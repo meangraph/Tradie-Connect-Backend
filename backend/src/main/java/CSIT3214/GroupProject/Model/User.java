@@ -13,7 +13,10 @@ public abstract class User {
     private String email;
     private String password;
     private String phoneNumber;
-    private String address;
+    private String streetAddress;
+    private String city;
+    private String state;
+    private String postCode;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "membership_id", referencedColumnName = "id")

@@ -14,6 +14,7 @@ public class ServiceProvider extends User {
     private String companyName;
     private String serviceArea;
     private Double rating;
+    private String Abn;
 
     @ElementCollection(targetClass = Skill.class)
     @CollectionTable(name = "service_provider_skill",
