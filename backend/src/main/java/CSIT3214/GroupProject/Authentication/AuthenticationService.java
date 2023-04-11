@@ -29,18 +29,18 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest request) {
         UserDetails userDetails;
-        if (request.getRole() == Role.CUSTOMER) {
+        if (request.getRole() == Role.ROLE_CUSTOMER) {
             var customer = new Customer();
             customer.setEmail(request.getEmail());
             customer.setPassword(passwordEncoder.encode(request.getPassword()));
-            customer.setRole(Role.CUSTOMER);
+            customer.setRole(Role.ROLE_CUSTOMER);
             customerRepository.save(customer);
             userDetails = new CustomUserDetails(customer, List.of(new SimpleGrantedAuthority(customer.getRole().toString())));
         } else {
             var serviceProvider = new ServiceProvider();
             serviceProvider.setEmail(request.getEmail());
             serviceProvider.setPassword(passwordEncoder.encode(request.getPassword()));
-            serviceProvider.setRole(Role.SERVICE_PROVIDER);
+            serviceProvider.setRole(Role.ROLE_SERVICE_PROVIDER);
             serviceProviderRepository.save(serviceProvider);
             userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
         }

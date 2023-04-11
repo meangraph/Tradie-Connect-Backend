@@ -1,8 +1,8 @@
 package CSIT3214.GroupProject.Model;
 
-public enum Role {
+    public enum Role {
+        ROLE_CUSTOMER,
+        ROLE_SERVICE_PROVIDER,
+        ROLE_ADMIN
+    }
 
-    CUSTOMER,
-    SERVICE_PROVIDER,
-    ADMIN
-}

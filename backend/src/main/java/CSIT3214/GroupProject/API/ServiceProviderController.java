@@ -1,5 +1,6 @@
 package CSIT3214.GroupProject.API;
 
+import CSIT3214.GroupProject.Model.Role;
 import CSIT3214.GroupProject.Model.ServiceProvider;
 import CSIT3214.GroupProject.Model.Skill;
 import CSIT3214.GroupProject.Service.ServiceProviderService;
@@ -32,6 +33,7 @@ public class ServiceProviderController {
     @PutMapping("/{id}")
     public ServiceProvider updateServiceProvider(@PathVariable Long id, @RequestBody ServiceProvider serviceProvider) {
         serviceProvider.setId(id);
+        serviceProvider.setRole(Role.ROLE_SERVICE_PROVIDER);
         return serviceProviderService.saveServiceProvider(serviceProvider);
     }
 
