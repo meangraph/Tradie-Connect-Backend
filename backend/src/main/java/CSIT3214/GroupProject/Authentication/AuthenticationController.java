@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletResponse response) {
         AuthenticationResponse authResponse = authenticationService.register(request);
         createHttpOnlyCookie(response, authResponse.getToken());
         return ResponseEntity.ok(authResponse);
     }
-
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
         AuthenticationResponse authResponse = authenticationService.authenticate(request);

@@ -5,10 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 @EnableWebSecurity
-@ConditionalOnExpression("'${disable-security}'!='false'")
 public class TradieFinderApplication {
 
 	public static void main(String[] args) {
