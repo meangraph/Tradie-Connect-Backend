@@ -1,9 +1,13 @@
 package CSIT3214.GroupProject.API;
 
+import CSIT3214.GroupProject.Model.GeoCoding.LatLng;
 import CSIT3214.GroupProject.Model.Role;
 import CSIT3214.GroupProject.Model.ServiceProvider;
 import CSIT3214.GroupProject.Model.Skill;
+import CSIT3214.GroupProject.Model.Suburb;
+import CSIT3214.GroupProject.Service.GeocodingService;
 import CSIT3214.GroupProject.Service.ServiceProviderService;
+import CSIT3214.GroupProject.Service.SuburbService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,10 @@ public class ServiceProviderController extends BaseController {
 
     @Autowired
     private ServiceProviderService serviceProviderService;
+    @Autowired
+    private GeocodingService geocodingService;
+    @Autowired
+    private SuburbService suburbService;
 
     @GetMapping("/all")
     public List<ServiceProvider> getAllServiceProviders() {
@@ -40,8 +48,18 @@ public class ServiceProviderController extends BaseController {
 
         serviceProvider.setId(userId);
         serviceProvider.setRole(Role.ROLE_SERVICE_PROVIDER);
+        // Get latitude and longitude for the suburb
+        LatLng latLng = geocodingService.getLatLng(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState());
+
+        // Find or create the suburb
+        Suburb suburb = suburbService.findOrCreateSuburb(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState(), latLng.getLat(), latLng.getLng());
+
+        // Set the suburb for the customer
+        serviceProvider.setSuburb(suburb);
+
         return serviceProviderService.saveServiceProvider(serviceProvider);
     }
+
 
     @DeleteMapping
     public void deleteCurrentServiceProvider(HttpServletRequest request) {

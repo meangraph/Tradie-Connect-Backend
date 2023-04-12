@@ -3,13 +3,9 @@ package CSIT3214.GroupProject.Model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 public class ServiceProvider extends User {
     private String companyName;
-    private String serviceArea;
     private Double rating;
     private String Abn;
 

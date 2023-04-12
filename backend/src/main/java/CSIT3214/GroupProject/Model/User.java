@@ -21,8 +21,9 @@ public abstract class User implements UserDetails {
     private String password;
     private String phoneNumber;
     private String streetAddress;
-    private String city;
-    private String state;
+    @ManyToOne
+    @JoinColumn(name = "suburb_id")
+    private Suburb suburb;
     private String postCode;
 
     @Enumerated(EnumType.STRING)

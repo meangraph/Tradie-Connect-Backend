@@ -1,8 +1,12 @@
 package CSIT3214.GroupProject.API;
 
 import CSIT3214.GroupProject.Model.Customer;
+import CSIT3214.GroupProject.Model.GeoCoding.LatLng;
 import CSIT3214.GroupProject.Model.Role;
+import CSIT3214.GroupProject.Model.Suburb;
 import CSIT3214.GroupProject.Service.CustomerService;
+import CSIT3214.GroupProject.Service.GeocodingService;
+import CSIT3214.GroupProject.Service.SuburbService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +19,12 @@ public class CustomerController extends BaseController{
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private GeocodingService geocodingService;
+
+    @Autowired
+    private SuburbService suburbService;
 
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @GetMapping
@@ -41,6 +51,15 @@ public class CustomerController extends BaseController{
         Long userId = userIdAndRole.getUserId();
         customer.setId(userId);
         customer.setRole(Role.ROLE_CUSTOMER);
+        // Get latitude and longitude for the suburb
+        LatLng latLng = geocodingService.getLatLng(customer.getSuburb().getName(), customer.getSuburb().getState());
+
+        // Find or create the suburb
+        Suburb suburb = suburbService.findOrCreateSuburb(customer.getSuburb().getName(), customer.getSuburb().getState(), latLng.getLat(), latLng.getLng());
+
+        // Set the suburb for the customer
+        customer.setSuburb(suburb);
+
         return customerService.saveCustomer(customer);
     }
 
