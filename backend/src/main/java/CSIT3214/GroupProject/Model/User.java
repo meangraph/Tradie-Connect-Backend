@@ -21,7 +21,8 @@ public abstract class User implements UserDetails {
     private String password;
     private String phoneNumber;
     private String streetAddress;
-    @ManyToOne
+
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "suburb_id")
     private Suburb suburb;
     private String postCode;

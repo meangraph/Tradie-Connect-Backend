@@ -12,6 +12,7 @@ public abstract class BaseController {
     @Autowired
     protected JwtService jwtService;
 
+
     protected UserIdAndRole getUserIdAndRoleFromJwt(HttpServletRequest request) {
         String jwt = null;
         Cookie[] cookies = request.getCookies();
@@ -57,5 +58,7 @@ public abstract class BaseController {
         public Role getRole() {
             return role;
         }
+
+
     }
 }

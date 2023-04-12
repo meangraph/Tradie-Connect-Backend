@@ -1,5 +1,6 @@
 package CSIT3214.GroupProject.Authentication;
 
+import CSIT3214.GroupProject.DataAccessLayer.UserDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,8 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletResponse response) {
-        AuthenticationResponse authResponse = authenticationService.register(request);
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody UserDTO userDTO, HttpServletResponse response) {
+        AuthenticationResponse authResponse = authenticationService.register(userDTO);
         createHttpOnlyCookie(response, authResponse.getToken());
         return ResponseEntity.ok(authResponse);
     }

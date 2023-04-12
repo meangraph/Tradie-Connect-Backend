@@ -1,5 +1,6 @@
 package CSIT3214.GroupProject.Authentication;
 
+import CSIT3214.GroupProject.Model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class AuthenticationResponse {
 
     private String token;
+    private User user;
 }
