@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,6 +90,16 @@ public class ServiceRequestService {
             }
         } else {
             return null;
+        }
+    }
+
+    public List<ServiceRequest> findServiceRequestsByUserIdAndRole(Long userId, Role role) {
+        if (role == Role.ROLE_CUSTOMER) {
+            return serviceRequestRepository.findByCustomerId(userId);
+        } else if (role == Role.ROLE_SERVICE_PROVIDER) {
+            return serviceRequestRepository.findByServiceProviderId(userId);
+        } else {
+            return new ArrayList<>();
         }
     }
 

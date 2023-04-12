@@ -3,6 +3,7 @@ package CSIT3214.GroupProject.API;
 import CSIT3214.GroupProject.Model.Customer;
 import CSIT3214.GroupProject.Model.Role;
 import CSIT3214.GroupProject.Service.CustomerService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-public class CustomerController {
+public class CustomerController extends BaseController{
 
     @Autowired
     private CustomerService customerService;
@@ -34,9 +35,11 @@ public class CustomerController {
     }
 
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
-    @PutMapping("/{id}")
-    public Customer updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
-        customer.setId(id);
+    @PutMapping
+    public Customer updateCurrentCustomer(@RequestBody Customer customer, HttpServletRequest request) {
+        UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
+        Long userId = userIdAndRole.getUserId();
+        customer.setId(userId);
         customer.setRole(Role.ROLE_CUSTOMER);
         return customerService.saveCustomer(customer);
     }

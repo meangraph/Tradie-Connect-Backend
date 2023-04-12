@@ -2,6 +2,7 @@ package CSIT3214.GroupProject.Config;
 
 import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
+import CSIT3214.GroupProject.Model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -18,6 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -48,15 +51,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String jwt = jwtCookie.getValue();
         final String email = jwtService.extractEmail(jwt);
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {//if user email is valid and not already authenticated
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
-            if (jwtService.isTokenValid(jwt, userDetails)) {//if the user and token is valid
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null,  userDetails.getAuthorities());
+            User user = findUserByEmail(email);
+
+            if (user != null && jwtService.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                // Check if the token is close to expiring
+                if (jwtService.isTokenCloseToExpiring(jwt)) {
+                    // Add user ID and role to the extraClaims map
+                    Map<String, Object> extraClaims = new HashMap<>();
+                    extraClaims.put("userId", user.getId());
+                    extraClaims.put("role", user.getRole().name());
+
+                    // Generate token with extraClaims
+                    String newJwt = jwtService.generateToken(extraClaims, userDetails);
+                    // Set the new JWT as a cookie
+                    Cookie newJwtCookie = new Cookie("JWT", newJwt);
+                    newJwtCookie.setHttpOnly(true);
+                    response.addCookie(newJwtCookie);
+                }
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private User findUserByEmail(String email) {
+        User user = customerRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            user = serviceProviderRepository.findByEmail(email).orElse(null);
+        }
+        return user;
     }
 }
