@@ -19,10 +19,15 @@ public class SuburbService {
         Optional<Suburb> existingSuburb = suburbRepository.findByNameAndState(name, state);
 
         if (existingSuburb.isPresent()) {
-            if (existingSuburb.get().getLatitude() == 0.0 || existingSuburb.get().getLongitude() == 0.0) {
-                return updateSuburb(existingSuburb.get(), latitude, longitude);
+            Suburb currentSuburb = existingSuburb.get();
+            if (currentSuburb.getLatitude() == 0.0 && currentSuburb.getLongitude() == 0.0) {
+                // Update the existing suburb with the new latitude and longitude values
+                currentSuburb.setLatitude(latitude);
+                currentSuburb.setLongitude(longitude);
+                return suburbRepository.save(currentSuburb);
+            } else {
+                return currentSuburb;
             }
-            return existingSuburb.get();
         } else {
             Suburb newSuburb = new Suburb();
             newSuburb.setName(name);
@@ -41,6 +46,22 @@ public class SuburbService {
 
     public Suburb findSuburbByNameAndState(String name, String state) {
         Optional<Suburb> existingSuburb = suburbRepository.findByNameAndState(name, state);
-        return existingSuburb.orElse(null);
+        if (existingSuburb.isPresent()) {
+            Suburb validSuburb = existingSuburb.filter(suburb -> suburb.getLatitude() != 0.0 && suburb.getLongitude() != 0.0).orElse(null);
+            if (validSuburb != null) {
+                return validSuburb;
+            } else {
+                Suburb emptyCoordinatesSuburb = existingSuburb.filter(suburb -> suburb.getLatitude() == 0.0 && suburb.getLongitude() == 0.0).orElse(null);
+                if (emptyCoordinatesSuburb != null) {
+                    return emptyCoordinatesSuburb;
+                } else {
+                    // Multiple suburbs found, but none with valid coordinates or empty coordinates
+                    logger.warn("Multiple suburbs found with name: {} and state: {}", name, state);
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
     }
 }

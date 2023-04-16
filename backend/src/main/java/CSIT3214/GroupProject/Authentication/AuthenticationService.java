@@ -5,10 +5,8 @@ import CSIT3214.GroupProject.DataAccessLayer.CustomUserDetails;
 import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
 import CSIT3214.GroupProject.DataAccessLayer.UserDTO;
-import CSIT3214.GroupProject.Model.Customer;
-import CSIT3214.GroupProject.Model.Role;
-import CSIT3214.GroupProject.Model.ServiceProvider;
-import CSIT3214.GroupProject.Model.User;
+import CSIT3214.GroupProject.Model.*;
+import CSIT3214.GroupProject.Service.SuburbService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +26,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final SuburbService suburbService;
 
     public AuthenticationResponse register(UserDTO userDTO) {
         UserDetails userDetails;
@@ -42,9 +41,12 @@ public class AuthenticationService {
             customer.setRole(Role.ROLE_CUSTOMER);
             customer.setPhoneNumber(userDTO.getPhoneNumber());
             customer.setStreetAddress(userDTO.getStreetAddress());
-            customer.setSuburb(userDTO.getSuburb());
             customer.setPostCode(userDTO.getPostCode());
-            //customer.setMembership(userDTO.getMembership());
+
+            Suburb suburb = suburbService.findOrCreateSuburb(userDTO.getSuburb().getName(), userDTO.getSuburb().getState(),
+                    userDTO.getSuburb().getLatitude(), userDTO.getSuburb().getLongitude());
+            customer.setSuburb(suburb);
+
             customerRepository.save(customer);
             userDetails = new CustomUserDetails(customer, List.of(new SimpleGrantedAuthority(customer.getRole().toString())));
             user = customer;
@@ -59,8 +61,11 @@ public class AuthenticationService {
             serviceProvider.setPhoneNumber(userDTO.getPhoneNumber());
             serviceProvider.setStreetAddress(userDTO.getStreetAddress());
             serviceProvider.setPostCode(userDTO.getPostCode());
-            serviceProvider.setSuburb(userDTO.getSuburb());
-            //serviceProvider.setMembership(userDTO.getMembership());
+
+            Suburb suburb = suburbService.findOrCreateSuburb(userDTO.getSuburb().getName(), userDTO.getSuburb().getState(),
+                    userDTO.getSuburb().getLatitude(), userDTO.getSuburb().getLongitude());
+            serviceProvider.setSuburb(suburb);
+
             serviceProviderRepository.save(serviceProvider);
             userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
             user = serviceProvider;

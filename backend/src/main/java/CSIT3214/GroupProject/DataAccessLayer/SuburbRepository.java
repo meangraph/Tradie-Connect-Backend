@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface SuburbRepository extends JpaRepository<Suburb, Long> {
     Optional<Suburb> findByNameAndState(String name, String state);
+
+
 }
