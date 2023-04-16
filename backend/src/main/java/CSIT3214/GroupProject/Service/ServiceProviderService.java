@@ -1,6 +1,7 @@
 package CSIT3214.GroupProject.Service;
 
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
+import CSIT3214.GroupProject.Model.Role;
 import CSIT3214.GroupProject.Model.ServiceProvider;
 import CSIT3214.GroupProject.Model.Skill;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class ServiceProviderService {
     }
     @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
     public ServiceProvider saveServiceProvider(ServiceProvider serviceProvider) {
+        serviceProvider.setRole(Role.ROLE_SERVICE_PROVIDER);
         return serviceProviderRepository.save(serviceProvider);
     }
 

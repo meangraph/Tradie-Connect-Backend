@@ -51,18 +51,31 @@ public class CustomerController extends BaseController{
         Long userId = userIdAndRole.getUserId();
         customer.setId(userId);
         customer.setRole(Role.ROLE_CUSTOMER);
-        // Get latitude and longitude for the suburb
-        LatLng latLng = geocodingService.getLatLng(customer.getSuburb().getName(), customer.getSuburb().getState());
+
+        Customer existingCustomer = customerService.findCustomerById(userId);
+
+        customer.setServiceRequests(existingCustomer.getServiceRequests());
+        customer.setReviews(existingCustomer.getReviews());
 
         // Find or create the suburb
-        Suburb suburb = suburbService.findOrCreateSuburb(customer.getSuburb().getName(), customer.getSuburb().getState(), latLng.getLat(), latLng.getLng());
+        Suburb existingSuburb = suburbService.findSuburbByNameAndState(customer.getSuburb().getName(), customer.getSuburb().getState());
 
-        // Set the suburb for the customer
-        customer.setSuburb(suburb);
+        if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
+            // Get latitude and longitude for the suburb
+            LatLng latLng = geocodingService.getLatLng(customer.getSuburb().getName(), customer.getSuburb().getState());
+
+            // Create or update the suburb
+            Suburb suburb = suburbService.findOrCreateSuburb(customer.getSuburb().getName(), customer.getSuburb().getState(), latLng.getLat(), latLng.getLng());
+
+            // Set the suburb for the customer
+            customer.setSuburb(suburb);
+        } else {
+            // Use the existing suburb
+            customer.setSuburb(existingSuburb);
+        }
 
         return customerService.saveCustomer(customer);
     }
-
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);

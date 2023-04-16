@@ -45,17 +45,30 @@ public class ServiceProviderController extends BaseController {
     public ServiceProvider updateCurrentServiceProvider(@RequestBody ServiceProvider serviceProvider, HttpServletRequest request) {
         UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
         Long userId = userIdAndRole.getUserId();
-
         serviceProvider.setId(userId);
         serviceProvider.setRole(Role.ROLE_SERVICE_PROVIDER);
-        // Get latitude and longitude for the suburb
-        LatLng latLng = geocodingService.getLatLng(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState());
+        Suburb existingSuburb = suburbService.findSuburbByNameAndState(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState());
 
-        // Find or create the suburb
-        Suburb suburb = suburbService.findOrCreateSuburb(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState(), latLng.getLat(), latLng.getLng());
+        ServiceProvider existingServiceProvider = serviceProviderService.findServiceProviderById(userId);
 
-        // Set the suburb for the customer
-        serviceProvider.setSuburb(suburb);
+        serviceProvider.setReviews(existingServiceProvider.getReviews());
+        serviceProvider.setSkills(existingServiceProvider.getSkills());
+        serviceProvider.setServiceRequests(existingServiceProvider.getServiceRequests());
+
+
+        if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
+            // Get latitude and longitude for the suburb
+            LatLng latLng = geocodingService.getLatLng(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState());
+
+            // Create or update the suburb
+            Suburb suburb = suburbService.findOrCreateSuburb(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState(), latLng.getLat(), latLng.getLng());
+
+            // Set the suburb for the customer
+            serviceProvider.setSuburb(suburb);
+        } else {
+            // Use the existing suburb
+            serviceProvider.setSuburb(existingSuburb);
+        }
 
         return serviceProviderService.saveServiceProvider(serviceProvider);
     }
