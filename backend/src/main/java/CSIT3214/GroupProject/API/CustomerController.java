@@ -44,6 +44,7 @@ public class CustomerController extends BaseController{
         return customerService.saveCustomer(customer);
     }
 
+
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @PutMapping
     public Customer updateCurrentCustomer(@RequestBody Customer customer, HttpServletRequest request) {
@@ -56,6 +57,8 @@ public class CustomerController extends BaseController{
 
         customer.setServiceRequests(existingCustomer.getServiceRequests());
         customer.setReviews(existingCustomer.getReviews());
+
+
 
         // Find or create the suburb
         Suburb existingSuburb = suburbService.findSuburbByNameAndState(customer.getSuburb().getName(), customer.getSuburb().getState());
