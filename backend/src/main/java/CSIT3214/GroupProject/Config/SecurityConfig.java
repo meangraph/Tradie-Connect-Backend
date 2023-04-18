@@ -1,6 +1,5 @@
 package CSIT3214.GroupProject.Config;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -26,15 +25,14 @@ public class SecurityConfig implements WebMvcConfigurer {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
                 .csrf()
                 .disable()
-                .cors()
-                .disable()
+                .cors() // Enable CORS
+                .and()
                 .authorizeHttpRequests()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
@@ -53,8 +51,8 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/*")
-                .allowedOrigins("")
+        registry.addMapping("/**") // Fix the mapping to allow all subdirectories
+                .allowedOrigins("http://localhost:3000") // Allow the specific origin
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
