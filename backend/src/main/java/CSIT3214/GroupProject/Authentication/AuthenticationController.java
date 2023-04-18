@@ -15,14 +15,14 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
-    @PostMapping("/register")
+    @PostMapping("/SignUp")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody UserDTO userDTO, HttpServletResponse response) {
         AuthenticationResponse authResponse = authenticationService.register(userDTO);
         createHttpOnlyCookie(response, authResponse.getToken());
         return ResponseEntity.ok(authResponse);
     }
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
-    @PostMapping("/authenticate")
+    @PostMapping("/SignIn")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
         AuthenticationResponse authResponse = authenticationService.authenticate(request);
         createHttpOnlyCookie(response, authResponse.getToken());
