@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController extends BaseController{
@@ -43,6 +44,7 @@ public class CustomerController extends BaseController{
     public Customer createCustomer(@RequestBody Customer customer) {
         return customerService.saveCustomer(customer);
     }
+
 
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @PutMapping

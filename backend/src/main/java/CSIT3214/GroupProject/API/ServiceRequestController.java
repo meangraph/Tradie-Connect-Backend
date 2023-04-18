@@ -5,13 +5,10 @@ import CSIT3214.GroupProject.DataAccessLayer.AcceptServiceRequestDTO;
 import CSIT3214.GroupProject.Model.Role;
 import CSIT3214.GroupProject.Model.ServiceRequest;
 import CSIT3214.GroupProject.Model.Skill;
-import CSIT3214.GroupProject.Model.User;
 import CSIT3214.GroupProject.Service.ServiceRequestService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/service-requests")
 public class ServiceRequestController {
