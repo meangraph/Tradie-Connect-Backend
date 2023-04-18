@@ -29,6 +29,8 @@ public class SecurityConfig {
         http
                 .csrf()
                 .disable()
+                .cors()
+                .disable()
                 .authorizeHttpRequests()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
