@@ -10,8 +10,12 @@ import CSIT3214.GroupProject.Service.ServiceProviderService;
 import CSIT3214.GroupProject.Service.SuburbService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
@@ -30,6 +34,7 @@ public class ServiceProviderController extends BaseController {
         return serviceProviderService.findAllServiceProviders();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
     @GetMapping
     public ServiceProvider getCurrentServiceProvider(HttpServletRequest request) {
         UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
@@ -41,37 +46,46 @@ public class ServiceProviderController extends BaseController {
     public ServiceProvider createServiceProvider(@RequestBody ServiceProvider serviceProvider) {
         return serviceProviderService.saveServiceProvider(serviceProvider);
     }
-
+    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
     @PutMapping
-    public ServiceProvider updateCurrentServiceProvider(@RequestBody ServiceProvider serviceProvider, HttpServletRequest request) {
+    public ServiceProvider updateCurrentServiceProvider(@RequestBody Map<String, Object> updatedFields, HttpServletRequest request) {
         UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
         Long userId = userIdAndRole.getUserId();
-        serviceProvider.setId(userId);
-        serviceProvider.setRole(Role.ROLE_SERVICE_PROVIDER);
-        Suburb existingSuburb = suburbService.findSuburbByNameAndState(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState());
 
         ServiceProvider existingServiceProvider = serviceProviderService.findServiceProviderById(userId);
-
-        serviceProvider.setReviews(existingServiceProvider.getReviews());
-        serviceProvider.setSkills(existingServiceProvider.getSkills());
-        serviceProvider.setServiceRequests(existingServiceProvider.getServiceRequests());
-
-
-        if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
-            // Get latitude and longitude for the suburb
-            LatLng latLng = geocodingService.getLatLng(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState());
-
-            // Create or update the suburb
-            Suburb suburb = suburbService.findOrCreateSuburb(serviceProvider.getSuburb().getName(), serviceProvider.getSuburb().getState(), latLng.getLat(), latLng.getLng());
-
-            // Set the suburb for the customer
-            serviceProvider.setSuburb(suburb);
-        } else {
-            // Use the existing suburb
-            serviceProvider.setSuburb(existingSuburb);
+        if (existingServiceProvider == null) {
+            throw new IllegalArgumentException("Service provider not found");
         }
 
-        return serviceProviderService.saveServiceProvider(serviceProvider);
+        for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
+            try {
+                Field field = ServiceProvider.class.getDeclaredField(entry.getKey());
+                field.setAccessible(true);
+                field.set(existingServiceProvider, entry.getValue());
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                //TODO: Handle exception
+            }
+        }
+
+
+        if (updatedFields.containsKey("suburb")) {
+            Map<String, String> suburbData = (Map<String, String>) updatedFields.get("suburb");
+            String suburbName = suburbData.get("name");
+            String suburbState = suburbData.get("state");
+
+            Suburb existingSuburb = suburbService.findSuburbByNameAndState(suburbName, suburbState);
+
+            if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
+                LatLng latLng = geocodingService.getLatLng(suburbName, suburbState);
+
+                Suburb suburb = suburbService.findOrCreateSuburb(suburbName, suburbState, latLng.getLat(), latLng.getLng());
+                existingServiceProvider.setSuburb(suburb);
+            } else {
+                existingServiceProvider.setSuburb(existingSuburb);
+            }
+        }
+
+        return serviceProviderService.saveServiceProvider(existingServiceProvider);
     }
 
 

@@ -11,7 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
@@ -48,35 +51,45 @@ public class CustomerController extends BaseController{
 
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @PutMapping
-    public Customer updateCurrentCustomer(@RequestBody Customer customer, HttpServletRequest request) {
+    public Customer updateCurrentCustomer(@RequestBody Map<String, Object> updatedFields, HttpServletRequest request) {
         UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
         Long userId = userIdAndRole.getUserId();
-        customer.setId(userId);
-        customer.setRole(Role.ROLE_CUSTOMER);
 
         Customer existingCustomer = customerService.findCustomerById(userId);
-
-        customer.setServiceRequests(existingCustomer.getServiceRequests());
-        customer.setReviews(existingCustomer.getReviews());
-
-        // Find or create the suburb
-        Suburb existingSuburb = suburbService.findSuburbByNameAndState(customer.getSuburb().getName(), customer.getSuburb().getState());
-
-        if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
-            // Get latitude and longitude for the suburb
-            LatLng latLng = geocodingService.getLatLng(customer.getSuburb().getName(), customer.getSuburb().getState());
-
-            // Create or update the suburb
-            Suburb suburb = suburbService.findOrCreateSuburb(customer.getSuburb().getName(), customer.getSuburb().getState(), latLng.getLat(), latLng.getLng());
-
-            // Set the suburb for the customer
-            customer.setSuburb(suburb);
-        } else {
-            // Use the existing suburb
-            customer.setSuburb(existingSuburb);
+        if (existingCustomer == null) {
+            throw new IllegalArgumentException("Customer not found");
         }
 
-        return customerService.saveCustomer(customer);
+        // Iterate through the updatedFields map and update the existingCustomer object using Reflection API
+        for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
+            try {
+                Field field = Customer.class.getDeclaredField(entry.getKey());
+                field.setAccessible(true);
+                field.set(existingCustomer, entry.getValue());
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                //TODO: Handle exception
+            }
+        }
+
+        // Handle suburb update
+        if (updatedFields.containsKey("suburb")) {
+            Map<String, String> suburbData = (Map<String, String>) updatedFields.get("suburb");
+            String suburbName = suburbData.get("name");
+            String suburbState = suburbData.get("state");
+
+            Suburb existingSuburb = suburbService.findSuburbByNameAndState(suburbName, suburbState);
+
+            if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
+                LatLng latLng = geocodingService.getLatLng(suburbName, suburbState);
+
+                Suburb suburb = suburbService.findOrCreateSuburb(suburbName, suburbState, latLng.getLat(), latLng.getLng());
+                existingCustomer.setSuburb(suburb);
+            } else {
+                existingCustomer.setSuburb(existingSuburb);
+            }
+        }
+
+        return customerService.saveCustomer(existingCustomer);
     }
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable Long id) {
