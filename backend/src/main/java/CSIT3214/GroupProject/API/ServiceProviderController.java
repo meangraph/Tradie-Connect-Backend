@@ -1,10 +1,7 @@
 package CSIT3214.GroupProject.API;
 
+import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Model.GeoCoding.LatLng;
-import CSIT3214.GroupProject.Model.Role;
-import CSIT3214.GroupProject.Model.ServiceProvider;
-import CSIT3214.GroupProject.Model.Skill;
-import CSIT3214.GroupProject.Model.Suburb;
 import CSIT3214.GroupProject.Service.GeocodingService;
 import CSIT3214.GroupProject.Service.ServiceProviderService;
 import CSIT3214.GroupProject.Service.SuburbService;
@@ -48,7 +45,7 @@ public class ServiceProviderController extends BaseController {
     }
     @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
     @PutMapping
-    public ServiceProvider updateCurrentServiceProvider(@RequestBody Map<String, Object> updatedFields, HttpServletRequest request) {
+    public ServiceProvider updateCurrentServiceProvider(@RequestBody Map < String, Object > updatedFields, HttpServletRequest request) {
         UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
         Long userId = userIdAndRole.getUserId();
 
@@ -57,19 +54,31 @@ public class ServiceProviderController extends BaseController {
             throw new IllegalArgumentException("Service provider not found");
         }
 
-        for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
+        // Iterate through the updatedFields map and update the existingServiceProvider object using Reflection API
+        for (Map.Entry < String, Object > entry: updatedFields.entrySet()) {
+            if ("suburb".equals(entry.getKey())) {
+                // Skip the suburb field here, as we will handle it separately later.
+                continue;
+            }
+
             try {
-                Field field = ServiceProvider.class.getDeclaredField(entry.getKey());
+                Field field;
+                try {
+                    field = ServiceProvider.class.getDeclaredField(entry.getKey());
+                } catch (NoSuchFieldException e) {
+                    // Try to find the field in the base class
+                    field = User.class.getDeclaredField(entry.getKey());
+                }
                 field.setAccessible(true);
                 field.set(existingServiceProvider, entry.getValue());
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                //TODO: Handle exception
+                // Handle the exception or log it
             }
         }
 
-
+        // Handle suburb update separately
         if (updatedFields.containsKey("suburb")) {
-            Map<String, String> suburbData = (Map<String, String>) updatedFields.get("suburb");
+            Map < String, String > suburbData = (Map < String, String > ) updatedFields.get("suburb");
             String suburbName = suburbData.get("name");
             String suburbState = suburbData.get("state");
 

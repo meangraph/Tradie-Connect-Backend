@@ -4,6 +4,7 @@ import CSIT3214.GroupProject.Model.Customer;
 import CSIT3214.GroupProject.Model.GeoCoding.LatLng;
 import CSIT3214.GroupProject.Model.Role;
 import CSIT3214.GroupProject.Model.Suburb;
+import CSIT3214.GroupProject.Model.User;
 import CSIT3214.GroupProject.Service.CustomerService;
 import CSIT3214.GroupProject.Service.GeocodingService;
 import CSIT3214.GroupProject.Service.SuburbService;
@@ -62,23 +63,34 @@ public class CustomerController extends BaseController{
 
         // Iterate through the updatedFields map and update the existingCustomer object using Reflection API
         for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
+            if ("suburb".equals(entry.getKey())) {
+                // Skip the suburb field here, as we will handle it separately later.
+                continue;
+            }
+
             try {
-                Field field = Customer.class.getDeclaredField(entry.getKey());
+                Field field;
+                try {
+                    field = Customer.class.getDeclaredField(entry.getKey());
+                } catch (NoSuchFieldException e) {
+                    // Try to find the field in the base class
+                    field = User.class.getDeclaredField(entry.getKey());
+                }
                 field.setAccessible(true);
                 field.set(existingCustomer, entry.getValue());
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                //TODO: Handle exception
+                // Handle the exception or log it
             }
         }
 
-        // Handle suburb update
+        // Handle suburb update separately
         if (updatedFields.containsKey("suburb")) {
             Map<String, String> suburbData = (Map<String, String>) updatedFields.get("suburb");
             String suburbName = suburbData.get("name");
             String suburbState = suburbData.get("state");
 
             Suburb existingSuburb = suburbService.findSuburbByNameAndState(suburbName, suburbState);
-
+            // ... rest of the suburb handling logic
             if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
                 LatLng latLng = geocodingService.getLatLng(suburbName, suburbState);
 
@@ -91,6 +103,7 @@ public class CustomerController extends BaseController{
 
         return customerService.saveCustomer(existingCustomer);
     }
+
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
