@@ -2,7 +2,13 @@ package CSIT3214.GroupProject.API;
 
 import CSIT3214.GroupProject.Config.JwtService;
 import CSIT3214.GroupProject.DataAccessLayer.AcceptServiceRequestDTO;
-import CSIT3214.GroupProject.Model.*;
+import CSIT3214.GroupProject.DataAccessLayer.CreateServiceRequestDTO;
+import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
+import CSIT3214.GroupProject.DataAccessLayer.ServiceRequestRepository;
+import CSIT3214.GroupProject.Model.Customer;
+import CSIT3214.GroupProject.Model.Role;
+import CSIT3214.GroupProject.Model.ServiceProvider;
+import CSIT3214.GroupProject.Model.ServiceRequest;
 import CSIT3214.GroupProject.Service.ServiceRequestService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -24,6 +30,11 @@ public class ServiceRequestController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    private ServiceRequestRepository serviceRequestRepository;
     @GetMapping
     public List<ServiceRequest> getAllServiceRequests() {
         return serviceRequestService.findAllServiceRequests();
@@ -38,34 +49,31 @@ public class ServiceRequestController {
         return serviceRequest;
     }
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
-    @PostMapping("/create/{customerId}/{serviceType}")
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public ServiceRequest createServiceRequest(@PathVariable Long customerId, @PathVariable Skill serviceType) {
-        ServiceRequest createdServiceRequest = serviceRequestService.createServiceRequest(customerId, serviceType, new ServiceRequest());
+    public ServiceRequest createServiceRequest(@RequestBody CreateServiceRequestDTO serviceRequestDTO, HttpServletRequest request) {
+        Long customerId = extractUserIdFromRequest(request);
+        ServiceRequest createdServiceRequest = serviceRequestService.createServiceRequest(customerId, serviceRequestDTO);
         if (createdServiceRequest == null) {
-            throw new BadRequestException("Unable to create service request. Invalid customer or service type ID.");
+            //TODO: handle error
         }
         return createdServiceRequest;
     }
 
-    @PutMapping("/accept/{serviceRequestId}/{serviceProviderId}")
+    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
+    @PutMapping("/accept")
     @ResponseStatus(HttpStatus.OK)
-    public ServiceRequest tradieAcceptsServiceRequest(@PathVariable Long serviceProviderId,
-                                                      @PathVariable Long serviceRequestId,
-                                                      @RequestBody AcceptServiceRequestDTO acceptServiceRequestDTO) {
-        ServiceRequest acceptedServiceRequest = serviceRequestService.acceptServiceRequest(serviceProviderId, serviceRequestId, acceptServiceRequestDTO);
-        if (acceptedServiceRequest == null) {
-            throw new BadRequestException("Unable to accept service request. Invalid service provider or service request ID.");
-        }
-        return acceptedServiceRequest;
+    public ServiceRequest tradieAcceptsServiceRequest(@RequestBody AcceptServiceRequestDTO dto, HttpServletRequest request) {
+        return serviceRequestService.acceptServiceRequest(dto, request);
     }
+
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @PutMapping("/accept/{serviceRequestId}/customer")
     @ResponseStatus(HttpStatus.OK)
     public ServiceRequest customerAcceptsRequest(@PathVariable Long serviceRequestId) {
         ServiceRequest acceptedServiceRequest = serviceRequestService.customerAcceptsRequest(serviceRequestId);
         if (acceptedServiceRequest == null) {
-            throw new BadRequestException("Unable to accept service request. Invalid service request ID.");
+            //TODO: handle error
         }
         return acceptedServiceRequest;
     }
@@ -100,16 +108,44 @@ public class ServiceRequestController {
         return serviceRequestService.findServiceRequestsByUserIdAndRole(userId, role);
     }
 
+
+
     @PreAuthorize("hasAnyAuthority('ROLE_CUSTOMER')")
-    @GetMapping("/customer-details/{CustomerId}")
-    public Customer getCustomerDetailsFromServiceRequest(@PathVariable Long CustomerId) {
-        return serviceRequestService.getCustomerDetails(CustomerId);
+    @GetMapping("/customer-details")
+    public Customer getCustomerDetailsFromServiceRequest(HttpServletRequest request) {
+        Long customerId = extractUserIdFromRequest(request);
+        return serviceRequestService.getCustomerDetails(customerId);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_SERVICE_PROVIDER')")
-    @GetMapping("/sp-details/{serviceProviderID}")
-    public ServiceProvider getServiceProviderDetailsFromServiceRequest(@PathVariable Long serviceProviderID) {
-        return serviceRequestService.getServiceProviderDetails(serviceProviderID);
+    @GetMapping("/sp-details")
+    public ServiceProvider getServiceProviderDetailsFromServiceRequest(HttpServletRequest request) {
+        Long serviceProviderId = extractUserIdFromRequest(request);
+        return serviceRequestService.getServiceProviderDetails(serviceProviderId);
+    }
+
+    private Long extractUserIdFromRequest(HttpServletRequest request) {
+        String jwt = extractJwtFromRequest(request);
+        Claims claims = jwtService.extractAllClaims(jwt);
+        Number userIdNumber = (Number) claims.get("userId");
+        if (userIdNumber == null) {
+            throw new IllegalArgumentException("User ID not found in JWT claims");
+        }
+
+        return userIdNumber.longValue();
+    }
+
+    private String extractJwtFromRequest(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JWT".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("JWT not found in cookies");
     }
 
 }
@@ -121,9 +157,3 @@ public class ServiceRequestController {
     }
 }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    class BadRequestException extends RuntimeException {
-    public BadRequestException(String message) {
-        super(message);
-    }
-}

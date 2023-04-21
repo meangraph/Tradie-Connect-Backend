@@ -1,9 +1,9 @@
 package CSIT3214.GroupProject.Model;
 
-import lombok.Data;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,25 +12,47 @@ public class DateTimeRange {
     private String endDate;
     private String startTime;
     private String endTime;
+    @Enumerated(EnumType.STRING)
+    private Skill serviceType;
 
 
     public LocalDate getStartDate() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(startDate, dateFormatter);
+        if (startDate != null) {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return LocalDate.parse(startDate, dateFormatter);
+        }
+        return null;
     }
 
     public LocalTime getStartTime() {
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
-        return LocalTime.parse(startTime, timeFormatter);
+        if (startTime != null) {
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
+            return LocalTime.parse(startTime, timeFormatter);
+        }
+        return null;
     }
 
     public LocalDate getEndDate() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(endDate, dateFormatter);
+        if (endDate != null) {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return LocalDate.parse(endDate, dateFormatter);
+        }
+        return null;
     }
 
     public LocalTime getEndTime() {
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
-        return LocalTime.parse(endTime, timeFormatter);
+        if (endTime != null) {
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
+            return LocalTime.parse(endTime, timeFormatter);
+        }
+        return null;
+    }
+
+    public Skill getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(Skill serviceType) {
+        this.serviceType = serviceType;
     }
 }
