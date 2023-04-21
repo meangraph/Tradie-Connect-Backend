@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,7 @@ public class ServiceRequestService {
             serviceRequest.setCustomer(customer.get());
             serviceRequest.setServiceType(serviceType);
             serviceRequest.setStatus(OrderStatus.CREATED);
-            serviceRequest.setRequestedTime(LocalDateTime.now());
+            serviceRequest.setRequestedTime(LocalTime.from(LocalDateTime.now()));
             return serviceRequestRepository.save(serviceRequest);
         } else {
             return null;
@@ -68,8 +69,12 @@ public class ServiceRequestService {
 
             requestToUpdate.setStatus(OrderStatus.QUOTED_AWAITING_CUSTOMER_APPROVAL);
 
-            LocalDateTime scheduledTime = dto.getDate().atTime(dto.getStartTime());
-            requestToUpdate.setScheduledTime(scheduledTime);
+            requestToUpdate.setScheduledStartDate(dto.getStartDate());
+            requestToUpdate.setScheduledStartTime(dto.getStartTime());
+            requestToUpdate.setScheduledEndDate(dto.getEndDate());
+            requestToUpdate.setScheduledEndTime(dto.getEndTime());
+            requestToUpdate.setDescription(dto.getDescription());
+
 
             return serviceRequestRepository.save(requestToUpdate);
         } else {
@@ -103,4 +108,11 @@ public class ServiceRequestService {
         }
     }
 
+    public Customer getCustomerDetails(Long customerId) {
+        return customerRepository.findById(customerId).orElse(null);
+    }
+
+    public ServiceProvider getServiceProviderDetails(Long serviceProviderId) {
+        return serviceProviderRepository.findById(serviceProviderId).orElse(null);
+    }
 }

@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -29,9 +31,15 @@ public class ServiceRequest {
     private Skill serviceType;
 
     @CreationTimestamp
-    private LocalDateTime requestedTime;
-    private LocalDateTime scheduledTime;
+    private LocalDate requestedDate;
+    private LocalTime requestedTime;
+    private LocalDate scheduledStartDate;
+    private LocalTime scheduledStartTime;
+    private LocalDate scheduledEndDate;
+    private LocalTime scheduledEndTime;
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Double cost;
+    private String description;
 
 }

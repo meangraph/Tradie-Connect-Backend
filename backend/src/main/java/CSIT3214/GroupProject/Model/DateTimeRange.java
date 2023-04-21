@@ -8,16 +8,29 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeRange {
-    private String date;
+    private String startDate;
+    private String endDate;
     private String startTime;
+    private String endTime;
 
-    public LocalDate getDate() {
+
+    public LocalDate getStartDate() {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(date, dateFormatter);
+        return LocalDate.parse(startDate, dateFormatter);
     }
 
     public LocalTime getStartTime() {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
         return LocalTime.parse(startTime, timeFormatter);
+    }
+
+    public LocalDate getEndDate() {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return LocalDate.parse(endDate, dateFormatter);
+    }
+
+    public LocalTime getEndTime() {
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
+        return LocalTime.parse(endTime, timeFormatter);
     }
 }

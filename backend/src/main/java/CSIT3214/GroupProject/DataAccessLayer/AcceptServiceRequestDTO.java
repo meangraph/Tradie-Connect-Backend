@@ -16,10 +16,11 @@ import java.time.LocalTime;
 public class AcceptServiceRequestDTO {
     private Double cost;
     private DateTimeRange dateTimeRange;
+    private String description;
 
-    public LocalDate getDate() {
+    public LocalDate getStartDate() {
         if (dateTimeRange != null) {
-            return dateTimeRange.getDate();
+            return dateTimeRange.getStartDate();
         }
         return null;
     }
@@ -27,6 +28,20 @@ public class AcceptServiceRequestDTO {
     public LocalTime getStartTime() {
         if (dateTimeRange != null) {
             return dateTimeRange.getStartTime();
+        }
+        return null;
+    }
+
+    public LocalDate getEndDate() {
+        if (dateTimeRange != null) {
+            return dateTimeRange.getEndDate();
+        }
+        return null;
+    }
+
+    public LocalTime getEndTime() {
+        if (dateTimeRange != null) {
+            return dateTimeRange.getEndTime();
         }
         return null;
     }

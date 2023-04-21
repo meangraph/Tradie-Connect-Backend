@@ -2,9 +2,7 @@ package CSIT3214.GroupProject.API;
 
 import CSIT3214.GroupProject.Config.JwtService;
 import CSIT3214.GroupProject.DataAccessLayer.AcceptServiceRequestDTO;
-import CSIT3214.GroupProject.Model.Role;
-import CSIT3214.GroupProject.Model.ServiceRequest;
-import CSIT3214.GroupProject.Model.Skill;
+import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Service.ServiceRequestService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -100,6 +98,18 @@ public class ServiceRequestController {
         Role role = Role.valueOf((String) claims.get("role"));
 
         return serviceRequestService.findServiceRequestsByUserIdAndRole(userId, role);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ROLE_CUSTOMER')")
+    @GetMapping("/customer-details/{CustomerId}")
+    public Customer getCustomerDetailsFromServiceRequest(@PathVariable Long CustomerId) {
+        return serviceRequestService.getCustomerDetails(CustomerId);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ROLE_SERVICE_PROVIDER')")
+    @GetMapping("/sp-details/{serviceProviderID}")
+    public ServiceProvider getServiceProviderDetailsFromServiceRequest(@PathVariable Long serviceProviderID) {
+        return serviceRequestService.getServiceProviderDetails(serviceProviderID);
     }
 
 }
