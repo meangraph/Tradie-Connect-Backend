@@ -5,6 +5,7 @@ import CSIT3214.GroupProject.Model.GeoCoding.LatLng;
 import CSIT3214.GroupProject.Service.GeocodingService;
 import CSIT3214.GroupProject.Service.ServiceProviderService;
 import CSIT3214.GroupProject.Service.SuburbService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,10 +55,13 @@ public class ServiceProviderController extends BaseController {
             throw new IllegalArgumentException("Service provider not found");
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
+
+
         // Iterate through the updatedFields map and update the existingServiceProvider object using Reflection API
         for (Map.Entry < String, Object > entry: updatedFields.entrySet()) {
             if ("suburb".equals(entry.getKey())) {
-                // Skip the suburb field here, as we will handle it separately later.
+                //Handle it later
                 continue;
             }
 
@@ -70,7 +74,15 @@ public class ServiceProviderController extends BaseController {
                     field = User.class.getDeclaredField(entry.getKey());
                 }
                 field.setAccessible(true);
-                field.set(existingServiceProvider, entry.getValue());
+
+                // Handle membership field separately
+                if ("membership".equals(entry.getKey())) {
+                    Map<String, Object> membershipData = (Map<String, Object>) entry.getValue();
+                    Membership membership = objectMapper.convertValue(membershipData, Membership.class);
+                    field.set(existingServiceProvider, membership);
+                } else {
+                    field.set(existingServiceProvider, entry.getValue());
+                }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 // Handle the exception or log it
             }

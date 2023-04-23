@@ -1,13 +1,11 @@
 package CSIT3214.GroupProject.API;
 
-import CSIT3214.GroupProject.Model.Customer;
+import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Model.GeoCoding.LatLng;
-import CSIT3214.GroupProject.Model.Role;
-import CSIT3214.GroupProject.Model.Suburb;
-import CSIT3214.GroupProject.Model.User;
 import CSIT3214.GroupProject.Service.CustomerService;
 import CSIT3214.GroupProject.Service.GeocodingService;
 import CSIT3214.GroupProject.Service.SuburbService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -61,6 +59,8 @@ public class CustomerController extends BaseController{
             throw new IllegalArgumentException("Customer not found");
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
+
         // Iterate through the updatedFields map and update the existingCustomer object using Reflection API
         for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
             if ("suburb".equals(entry.getKey())) {
@@ -77,7 +77,15 @@ public class CustomerController extends BaseController{
                     field = User.class.getDeclaredField(entry.getKey());
                 }
                 field.setAccessible(true);
-                field.set(existingCustomer, entry.getValue());
+
+                // Handle membership field separately
+                if ("membership".equals(entry.getKey())) {
+                    Map<String, Object> membershipData = (Map<String, Object>) entry.getValue();
+                    Membership membership = objectMapper.convertValue(membershipData, Membership.class);
+                    field.set(existingCustomer, membership);
+                } else {
+                    field.set(existingCustomer, entry.getValue());
+                }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 // Handle the exception or log it
             }
