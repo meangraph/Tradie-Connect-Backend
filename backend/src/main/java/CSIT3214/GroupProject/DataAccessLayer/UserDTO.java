@@ -21,5 +21,5 @@ public class UserDTO {
     private String streetAddress;
     private Suburb suburb;
     private String postCode;
-    //private Membership membership;
+    private Membership membership;
 }
