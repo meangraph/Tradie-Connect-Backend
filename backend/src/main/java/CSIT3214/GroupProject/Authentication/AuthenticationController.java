@@ -29,6 +29,17 @@ public class AuthenticationController {
         return ResponseEntity.ok(authResponse);
     }
 
+    @PostMapping("/Logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("JWT", "");
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setMaxAge(0);
+        jwtCookie.setPath("/");
+        response.addCookie(jwtCookie);
+        return ResponseEntity.ok().build();
+    }
+
+
     private void createHttpOnlyCookie(HttpServletResponse response, String jwt) {
         Cookie jwtCookie = new Cookie("JWT", jwt);
         jwtCookie.setHttpOnly(true);
