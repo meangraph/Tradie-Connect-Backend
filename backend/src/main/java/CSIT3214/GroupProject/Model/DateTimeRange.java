@@ -1,8 +1,5 @@
 package CSIT3214.GroupProject.Model;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -12,8 +9,6 @@ public class DateTimeRange {
     private String endDate;
     private String startTime;
     private String endTime;
-    @Enumerated(EnumType.STRING)
-    private Skill serviceType;
 
 
     public LocalDate getStartDate() {
@@ -48,11 +43,5 @@ public class DateTimeRange {
         return null;
     }
 
-    public Skill getServiceType() {
-        return serviceType;
-    }
 
-    public void setServiceType(Skill serviceType) {
-        this.serviceType = serviceType;
-    }
 }

@@ -3,6 +3,9 @@
 package CSIT3214.GroupProject.DataAccessLayer;
 
 import CSIT3214.GroupProject.Model.DateTimeRange;
+import CSIT3214.GroupProject.Model.Skill;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +21,8 @@ public class CreateServiceRequestDTO {
     private Double cost;
     private DateTimeRange dateTimeRange;
     private String description;
+    @Enumerated(EnumType.STRING)
+    private Skill serviceType;
 
     public LocalDate getStartDate() {
         if (dateTimeRange != null) {
@@ -45,5 +50,13 @@ public class CreateServiceRequestDTO {
             return dateTimeRange.getEndTime();
         }
         return null;
+    }
+
+    public Skill getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(Skill serviceType) {
+        this.serviceType = serviceType;
     }
 }

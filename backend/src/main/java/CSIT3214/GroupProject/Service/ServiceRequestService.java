@@ -44,7 +44,7 @@ public class ServiceRequestService {
         if (customer.isPresent()) {
             ServiceRequest serviceRequest = new ServiceRequest();
             serviceRequest.setCustomer(customer.get());
-            serviceRequest.setServiceType(serviceRequestDTO.getDateTimeRange().getServiceType());
+            serviceRequest.setServiceType(serviceRequestDTO.getServiceType());
             serviceRequest.setStatus(OrderStatus.CREATED);
             serviceRequest.setRequestedTime(LocalTime.from(LocalDateTime.now()));
             serviceRequest.setDescription(serviceRequestDTO.getDescription());
