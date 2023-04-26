@@ -23,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
+    // Inject required services and repositories
     private final CustomerRepository customerRepository;
     private final ServiceProviderRepository serviceProviderRepository;
     private final PasswordEncoder passwordEncoder;
@@ -31,12 +32,14 @@ public class AuthenticationService {
     private final SuburbService suburbService;
     private final MembershipService membershipService;
 
+    // Method to register a new user
     public AuthenticationResponse register(UserDTO userDTO) {
         UserDetails userDetails;
         User user;
+        // Check the user role and create an appropriate user object
         if (userDTO.getRole() == Role.ROLE_CUSTOMER) {
             var customer = new Customer();
-            // Set customer properties from userDTO
+            // Create a new Customer and set the properties from the provided userDTO
             customer.setFirstName(userDTO.getFirstName());
             customer.setLastName(userDTO.getLastName());
             customer.setEmail(userDTO.getEmail());
@@ -54,12 +57,14 @@ public class AuthenticationService {
 
             customer.setMembership(membership);
 
+            // Save the customer to the repository
             customerRepository.save(customer);
+            // Create a new CustomUserDetails object containing the customer's information
             userDetails = new CustomUserDetails(customer, List.of(new SimpleGrantedAuthority(customer.getRole().toString())));
             user = customer;
         } else {
             var serviceProvider = new ServiceProvider();
-            // Set serviceProvider properties from userDTO
+            // Create a new ServiceProvider and set the properties from the provided userDTO
             serviceProvider.setCompanyName(userDTO.getCompanyName());
             serviceProvider.setAbn(userDTO.getAbn());
             serviceProvider.setEmail(userDTO.getEmail());
@@ -77,11 +82,14 @@ public class AuthenticationService {
 
             serviceProvider.setMembership(membership);
 
+            // Save the service provider to the repository
             serviceProviderRepository.save(serviceProvider);
+            // Create a new CustomUserDetails object containing the service provider's information
             userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
             user = serviceProvider;
         }
 
+        // Generate a JWT token for the user
         var jwtToken = jwtService.generateToken(userDetails);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -89,10 +97,13 @@ public class AuthenticationService {
                 .build();
     }
 
+    // Method to authenticate a user
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        // Authenticate the user using their email and password
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         UserDetails userDetails;
+        // Check if the user exists in the Customer repository, if not, check the ServiceProvider repository
         var customer = customerRepository.findByEmail(request.getEmail());
         if (customer.isPresent()) {
             userDetails = new CustomUserDetails(customer.get(), List.of(new SimpleGrantedAuthority(customer.get().getRole().toString())));
@@ -100,12 +111,13 @@ public class AuthenticationService {
             var serviceProvider = serviceProviderRepository.findByEmail(request.getEmail()).orElseThrow();
             userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
         }
-
+        // Generate a JWT token for the user
         var jwtToken = jwtService.generateToken(userDetails);
+
+        // Return an AuthenticationResponse containing the JWT token
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
     }
-
 }
 

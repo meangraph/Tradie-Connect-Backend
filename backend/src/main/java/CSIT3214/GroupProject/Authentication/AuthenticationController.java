@@ -13,19 +13,30 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
+    // Inject the AuthenticationService
     private final AuthenticationService authenticationService;
+
+    // Endpoint to handle user registration
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
     @PostMapping("/SignUp")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody UserDTO userDTO, HttpServletResponse response) {
+        // Call the AuthenticationService's register method
         AuthenticationResponse authResponse = authenticationService.register(userDTO);
+        // Create an HttpOnly cookie containing the JWT token
         createHttpOnlyCookie(response, authResponse.getToken());
+        // Return the registration response
         return ResponseEntity.ok(authResponse);
     }
+
+    // Endpoint to handle user authentication
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
     @PostMapping("/SignIn")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
+        // Call the AuthenticationService's authenticate method
         AuthenticationResponse authResponse = authenticationService.authenticate(request);
+        // Create an HttpOnly cookie containing the JWT token
         createHttpOnlyCookie(response, authResponse.getToken());
+        // Return the authentication response
         return ResponseEntity.ok(authResponse);
     }
 
@@ -39,7 +50,6 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
-
     private void createHttpOnlyCookie(HttpServletResponse response, String jwt) {
         Cookie jwtCookie = new Cookie("JWT", jwt);
         jwtCookie.setHttpOnly(true);
@@ -48,6 +58,7 @@ public class AuthenticationController {
         response.addCookie(jwtCookie);
     }
 
+    //Used for testing role based endpoint authorization
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @GetMapping("/CustomerTest")
     public String helloCust() {

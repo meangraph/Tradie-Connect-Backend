@@ -30,11 +30,6 @@ public class ServiceRequestController {
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
-    private ServiceRequestRepository serviceRequestRepository;
     @GetMapping
     public List<ServiceRequest> getAllServiceRequests() {
         return serviceRequestService.findAllServiceRequests();
@@ -150,10 +145,9 @@ public class ServiceRequestController {
 
 }
 //Exceptions
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    class ServiceRequestNotFoundException extends RuntimeException {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+class ServiceRequestNotFoundException extends RuntimeException {
     public ServiceRequestNotFoundException(String message) {
         super(message);
     }
 }
-

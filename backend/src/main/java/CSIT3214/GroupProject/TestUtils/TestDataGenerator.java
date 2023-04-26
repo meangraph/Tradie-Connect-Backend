@@ -40,4 +40,8 @@ public class TestDataGenerator {
     private MembershipType randomCustomerMembershipType() {
         return Math.random() < 0.5 ? MembershipType.CLIENT_SUBSCRIPTION : MembershipType.PAY_ON_DEMAND;
     }
+
+    private MembershipType randomServiceProviderMembershipType() {
+        return Math.random() < 0.5 ? MembershipType.SERVICE_PROVIDER_SUBSCRIPTION : MembershipType.COMMISSION;
+    }
 }

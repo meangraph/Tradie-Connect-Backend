@@ -35,33 +35,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        //extract info from the cookie
+        // Extract JWT token from the cookie
         Cookie[] cookies = request.getCookies();
 
+        // If no cookies are present, continue with the filter chain
         if (cookies == null) {
             filterChain.doFilter(request, response);
             return;
         }
+        // Find the JWT cookie from the array of cookies
         Cookie jwtCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals("JWT")).findFirst().orElse(null);
 
+        // If the JWT cookie is not present, continue with the filter chain
         if (jwtCookie == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Extract the email from the JWT token
         final String jwt = jwtCookie.getValue();
         final String email = jwtService.extractEmail(jwt);
+
+        // If the email is not null and there is no authentication in the SecurityContextHolder, attempt to authenticate the user
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // Load the user details and find the user by email
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
             User user = findUserByEmail(email);
 
+            // If the token is valid, create an authentication token and set it in the SecurityContextHolder
             if (user != null && jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                // Check if the token is close to expiring
+                // Check if the token is close to expiring and refresh it if necessary
                 if (jwtService.isTokenCloseToExpiring(jwt)) {
                     // Add user ID and role to the extraClaims map
                     Map<String, Object> extraClaims = new HashMap<>();
@@ -80,7 +88,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // Method to find a user by email
     private User findUserByEmail(String email) {
+        // Try to find the user in the CustomerRepository, if not found, try the ServiceProviderRepository
         User user = customerRepository.findByEmail(email).orElse(null);
         if (user == null) {
             user = serviceProviderRepository.findByEmail(email).orElse(null);
