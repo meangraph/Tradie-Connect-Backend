@@ -30,11 +30,13 @@ public class ServiceRequestController {
     @Autowired
     private JwtService jwtService;
 
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping
     public List<ServiceRequest> getAllServiceRequests() {
         return serviceRequestService.findAllServiceRequests();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping("/{id}")
     public ServiceRequest getServiceRequestById(@PathVariable Long id) {
         ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(id);

@@ -29,13 +29,22 @@ public class CustomerController extends BaseController{
     @Autowired
     private SuburbService suburbService;
 
+
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @GetMapping
+    public Customer getCurrentCustomer(HttpServletRequest request) {
+        UserIdAndRole userIdAndRole = getUserIdAndRoleFromJwt(request);
+        Long userId = userIdAndRole.getUserId();
+        return customerService.findCustomerById(userId);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @GetMapping("/all")
     public List<Customer> getAllCustomers() {
         return customerService.findAllCustomers();
     }
 
-    @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable Long id) {
         return customerService.findCustomerById(id);

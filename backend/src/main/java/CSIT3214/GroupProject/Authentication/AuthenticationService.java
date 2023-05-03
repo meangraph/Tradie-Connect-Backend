@@ -1,10 +1,7 @@
 package CSIT3214.GroupProject.Authentication;
 
 import CSIT3214.GroupProject.Config.JwtService;
-import CSIT3214.GroupProject.DataAccessLayer.CustomUserDetails;
-import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
-import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
-import CSIT3214.GroupProject.DataAccessLayer.UserDTO;
+import CSIT3214.GroupProject.DataAccessLayer.*;
 import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Service.MembershipService;
 import CSIT3214.GroupProject.Service.PaymentService;
@@ -31,6 +28,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final SuburbService suburbService;
     private final MembershipService membershipService;
+    private final SystemAdminRepository systemAdminRepository;
 
     // Method to register a new user
     public AuthenticationResponse register(UserDTO userDTO) {
@@ -103,21 +101,25 @@ public class AuthenticationService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         UserDetails userDetails;
-        // Check if the user exists in the Customer repository, if not, check the ServiceProvider repository
+        // Check if the user exists in the Customer repository, if not, check the ServiceProvider repository, and finally, check the SystemAdmin repository
         var customer = customerRepository.findByEmail(request.getEmail());
         if (customer.isPresent()) {
             userDetails = new CustomUserDetails(customer.get(), List.of(new SimpleGrantedAuthority(customer.get().getRole().toString())));
         } else {
-            var serviceProvider = serviceProviderRepository.findByEmail(request.getEmail()).orElseThrow();
-            userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
+            var serviceProvider = serviceProviderRepository.findByEmail(request.getEmail()).orElse(null);
+            if (serviceProvider != null) {
+                userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
+            } else {
+                var systemAdmin = systemAdminRepository.findByEmail(request.getEmail()).orElseThrow(); // Add this line
+                userDetails = new CustomUserDetails(systemAdmin, List.of(new SimpleGrantedAuthority(systemAdmin.getRole().toString()))); // Add this line
+            }
         }
-        // Generate a JWT token for the user
+// Generate a JWT token for the user
         var jwtToken = jwtService.generateToken(userDetails);
 
-        // Return an AuthenticationResponse containing the JWT token
+// Return an AuthenticationResponse containing the JWT token
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
     }
 }
-

@@ -2,6 +2,7 @@ package CSIT3214.GroupProject.Config;
 
 import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
+import CSIT3214.GroupProject.DataAccessLayer.SystemAdminRepository;
 import CSIT3214.GroupProject.Model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,6 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustomerRepository customerRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final SystemAdminRepository systemAdminRepository;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -90,10 +92,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Method to find a user by email
     private User findUserByEmail(String email) {
-        // Try to find the user in the CustomerRepository, if not found, try the ServiceProviderRepository
         User user = customerRepository.findByEmail(email).orElse(null);
         if (user == null) {
             user = serviceProviderRepository.findByEmail(email).orElse(null);
+        }
+        if (user == null) { // Add this block
+            user = systemAdminRepository.findByEmail(email).orElse(null);
         }
         return user;
     }

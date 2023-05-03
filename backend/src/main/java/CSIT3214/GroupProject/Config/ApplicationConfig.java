@@ -3,8 +3,10 @@ package CSIT3214.GroupProject.Config;
 import CSIT3214.GroupProject.DataAccessLayer.CustomUserDetails;
 import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
+import CSIT3214.GroupProject.DataAccessLayer.SystemAdminRepository;
 import CSIT3214.GroupProject.Model.Customer;
 import CSIT3214.GroupProject.Model.ServiceProvider;
+import CSIT3214.GroupProject.Model.SystemAdmin;
 import CSIT3214.GroupProject.Model.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class ApplicationConfig {
 
     private final CustomerRepository customerRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final SystemAdminRepository systemAdminRepository;
 
     @Bean
     @Transactional
@@ -39,11 +42,14 @@ public class ApplicationConfig {
             try {
                 Customer customer = customerRepository.findByEmail(username).orElse(null);
                 ServiceProvider serviceProvider = serviceProviderRepository.findByEmail(username).orElse(null);
+                SystemAdmin systemAdmin = systemAdminRepository.findByEmail(username).orElse(null); // Add this line
 
                 if (customer != null) {
                     user = customer;
                 } else if (serviceProvider != null) {
                     user = serviceProvider;
+                } else if (systemAdmin != null) {
+                    user = systemAdmin;
                 } else {
                     throw new UsernameNotFoundException("User not found with username: " + username);
                 }
@@ -57,8 +63,6 @@ public class ApplicationConfig {
             return new CustomUserDetails(user, authorities);
         };
     }
-
-
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

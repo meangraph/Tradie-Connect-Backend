@@ -3,6 +3,7 @@ package CSIT3214.GroupProject.API;
 import CSIT3214.GroupProject.Model.Review;
 import CSIT3214.GroupProject.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -14,11 +15,13 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @GetMapping("/all")
     public List<Review> getAllReviews() {
         return reviewService.findAllReviews();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable Long id) {
         return reviewService.findReviewById(id);

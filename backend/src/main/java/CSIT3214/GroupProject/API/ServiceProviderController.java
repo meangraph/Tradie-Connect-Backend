@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Field;
@@ -27,9 +29,14 @@ public class ServiceProviderController extends BaseController {
     @Autowired
     private SuburbService suburbService;
 
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping("/all")
     public List<ServiceProvider> getAllServiceProviders() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authenticated user has roles: " + authentication.getAuthorities());
         return serviceProviderService.findAllServiceProviders();
+
     }
 
     @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")

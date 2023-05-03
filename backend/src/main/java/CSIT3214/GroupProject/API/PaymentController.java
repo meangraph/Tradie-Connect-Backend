@@ -10,9 +10,11 @@ import com.stripe.model.Charge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
@@ -101,5 +103,11 @@ public class PaymentController {
         } catch (StripeException e) {
             return new ResponseEntity<>("Error processing payment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @GetMapping("/all")
+    public List<Payment> getAllPayments() {
+        return paymentService.getAllPayments();
     }
 }

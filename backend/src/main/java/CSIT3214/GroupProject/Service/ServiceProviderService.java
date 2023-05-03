@@ -14,11 +14,11 @@ public class ServiceProviderService {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
-    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
+
     public List<ServiceProvider> findAllServiceProviders() {
         return serviceProviderRepository.findAll();
     }
-    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
+
     public ServiceProvider findServiceProviderById(Long id) {
         return serviceProviderRepository.findById(id).orElse(null);
     }
