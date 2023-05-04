@@ -40,6 +40,7 @@ public class ServiceRequest {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Double cost;
+    @Lob
     private String description;
 
 }
