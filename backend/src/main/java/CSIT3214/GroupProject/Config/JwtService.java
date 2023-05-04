@@ -2,6 +2,7 @@ package CSIT3214.GroupProject.Config;
 
 import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
+import CSIT3214.GroupProject.DataAccessLayer.SystemAdminRepository;
 import CSIT3214.GroupProject.Model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -28,6 +29,9 @@ public class JwtService {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    private SystemAdminRepository systemAdminRepository;
 
     // Secret key for signing the JWT tokens
     private static final String SECRET_KEY = "50655368566D597133743677397A244326452948404D635166546A576E5A7234";
@@ -101,6 +105,8 @@ public class JwtService {
         User user = customerRepository.findByEmail(email).orElse(null);
         if (user == null) {
             user = serviceProviderRepository.findByEmail(email).orElse(null);
+        } if (user == null) {
+            user = systemAdminRepository.findByEmail(email).orElse(null);
         }
         return user;
     }
