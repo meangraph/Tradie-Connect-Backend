@@ -36,7 +36,7 @@ public class ServiceRequestController {
         return serviceRequestService.findAllServiceRequests();
     }
 
-    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN', 'ROLE_CUSTOMER', 'ROLE_SERVICE_PROVIDER')")
     @GetMapping("/{id}")
     public ServiceRequest getServiceRequestById(@PathVariable Long id) {
         ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(id);
