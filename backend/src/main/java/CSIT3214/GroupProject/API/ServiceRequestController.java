@@ -30,6 +30,9 @@ public class ServiceRequestController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+
     @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping
     public List<ServiceRequest> getAllServiceRequests() {
@@ -57,23 +60,41 @@ public class ServiceRequestController {
         return createdServiceRequest;
     }
 
-    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
-    @PutMapping("/accept")
-    @ResponseStatus(HttpStatus.OK)
-    public ServiceRequest tradieAcceptsServiceRequest(@RequestBody AcceptServiceRequestDTO dto, HttpServletRequest request) {
-        return serviceRequestService.acceptServiceRequest(dto, request);
-    }
-
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
-    @PutMapping("/accept/{serviceRequestId}/customer")
-    @ResponseStatus(HttpStatus.OK)
-    public ServiceRequest customerAcceptsRequest(@PathVariable Long serviceRequestId) {
-        ServiceRequest acceptedServiceRequest = serviceRequestService.customerAcceptsRequest(serviceRequestId);
-        if (acceptedServiceRequest == null) {
+    @GetMapping("/{serviceRequestId}/valid-service-providers")
+    public List<ServiceProvider> getValidServiceProviders(@PathVariable Long serviceRequestId) {
+        ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
+        if (serviceRequest == null) {
             //TODO: handle error
         }
-        return acceptedServiceRequest;
+        return serviceRequestService.findValidServiceProviders(serviceRequest);
     }
+
+    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
+    @PostMapping("/{serviceRequestId}/apply")
+    public void applyForServiceRequest(@PathVariable Long serviceRequestId, HttpServletRequest request) {
+        Long serviceProviderId = extractUserIdFromRequest(request);
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(serviceProviderId).orElse(null);
+        ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
+        if (serviceRequest == null) {
+            //TODO:
+        }
+        serviceRequestService.applyForServiceRequest(serviceRequest, serviceProvider);
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
+    @PostMapping("/{serviceRequestId}/accept-service-provider/{serviceProviderId}")
+    public void acceptServiceProvider(@PathVariable Long serviceRequestId, @PathVariable Long serviceProviderId) {
+        ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
+        if (serviceRequest == null) {
+            //TODO:
+        }
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(serviceProviderId).orElse(null);
+
+        serviceRequestService.acceptServiceProvider(serviceRequest, serviceProvider);
+    }
+
     @PreAuthorize("hasAnyAuthority('ROLE_CUSTOMER', 'ROLE_SERVICE_PROVIDER')")
     @GetMapping("/user-requests")
     public List<ServiceRequest> getServiceRequestsForCurrentUser(HttpServletRequest request) {

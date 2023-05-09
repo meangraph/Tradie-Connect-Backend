@@ -1,6 +1,8 @@
 package CSIT3214.GroupProject.Model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -13,12 +15,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Customer extends User {
     private String firstName;
     private String lastName;
 
     @OneToMany(mappedBy = "customer")
-    @JsonManagedReference("customer-serviceRequests")
+    //@JsonManagedReference("customer-serviceRequests")
     private List<ServiceRequest> serviceRequests;
 
     @OneToMany(mappedBy = "customer")

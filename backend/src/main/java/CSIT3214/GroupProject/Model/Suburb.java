@@ -20,7 +20,5 @@ public class Suburb {
     private String name;
     private double latitude;
     private double longitude;
-
-    // Add the state field
     private String state;
 }

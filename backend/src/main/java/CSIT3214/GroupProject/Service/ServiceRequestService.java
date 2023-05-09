@@ -68,25 +68,51 @@ public class ServiceRequestService {
         }
     }
 
-    public ServiceRequest acceptServiceRequest(AcceptServiceRequestDTO dto, HttpServletRequest request) {
-        Long serviceRequestId = dto.getServiceRequestId();
-        Long serviceProviderId = extractUserIdFromRequest(request);
-        Optional<ServiceProvider> serviceProvider = serviceProviderRepository.findById(serviceProviderId);
-        Optional<ServiceRequest> optionalServiceRequest = serviceRequestRepository.findById(serviceRequestId);
+    public List<ServiceProvider> findValidServiceProviders(ServiceRequest serviceRequest) {
+        Suburb customerSuburb = serviceRequest.getCustomer().getSuburb();
+        double customerLatitude = customerSuburb.getLatitude();
+        double customerLongitude = customerSuburb.getLongitude();
 
-        if (serviceProvider.isPresent() && optionalServiceRequest.isPresent()) {
-            ServiceRequest requestToUpdate = optionalServiceRequest.get();
-            requestToUpdate.setServiceProvider(serviceProvider.get());
+        List<ServiceProvider> serviceProviderBySkill = serviceProviderRepository.findByServiceType(serviceRequest.getServiceType());
 
-            // Get the customer from the service request
-            Customer customer = requestToUpdate.getCustomer();
+        List<ServiceProvider> validServiceProviders = new ArrayList<>();
 
+        for (ServiceProvider serviceProvider : serviceProviderBySkill) {
+            double serviceProviderLatitude = serviceProvider.getSuburb().getLatitude();
+            double serviceProviderLongitude = serviceProvider.getSuburb().getLongitude();
 
-            requestToUpdate.setStatus(OrderStatus.ACCEPTED);
-            return serviceRequestRepository.save(requestToUpdate);
-        } else {
-            return null; // TODO: Error handling
+            double distance = haversine(customerLatitude, customerLongitude, serviceProviderLatitude, serviceProviderLongitude);
+
+            if (distance <= 50) {
+                validServiceProviders.add(serviceProvider);
+            }
         }
+
+        return validServiceProviders;
+    }
+
+    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6371; // Earth radius in kilometers
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
+
+    public void applyForServiceRequest(ServiceRequest serviceRequest, ServiceProvider serviceProvider) {
+        serviceRequest.getApplicants().add(serviceProvider);
+        serviceRequestRepository.save(serviceRequest);
+    }
+
+    public void acceptServiceProvider(ServiceRequest serviceRequest, ServiceProvider serviceProvider) {
+        serviceRequest.setServiceProvider(serviceProvider);
+        serviceRequest.setStatus(OrderStatus.ACCEPTED);
+        serviceRequestRepository.save(serviceRequest);
     }
     private String getJwtFromCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();

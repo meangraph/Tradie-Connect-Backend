@@ -1,6 +1,8 @@
 package CSIT3214.GroupProject.Model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +16,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class ServiceProvider extends User {
     private String companyName;
     private Double rating;
@@ -26,7 +29,7 @@ public class ServiceProvider extends User {
     private Set<Skill> skills = EnumSet.noneOf(Skill.class);
 
     @OneToMany(mappedBy = "serviceProvider")
-    @JsonManagedReference("serviceProvider-serviceRequests")
+    //@JsonManagedReference("serviceProvider-serviceRequests")
     private List<ServiceRequest> serviceRequests;
 
     @OneToMany(mappedBy = "serviceProvider")
