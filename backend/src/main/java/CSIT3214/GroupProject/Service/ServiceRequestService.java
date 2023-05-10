@@ -127,12 +127,13 @@ public class ServiceRequestService {
     }
 
     public void applyForServiceRequest(ServiceRequest serviceRequest, ServiceProvider serviceProvider) {
-        serviceRequest.getApplicants().add(serviceProvider);
+        //serviceRequest.getApplicants().add(serviceProvider);
+        serviceRequest.addApplicant(serviceProvider);
         serviceRequestRepository.save(serviceRequest);
     }
 
     public void acceptServiceProvider(ServiceRequest serviceRequest, ServiceProvider serviceProvider) {
-        serviceRequest.setServiceProvider(serviceProvider);
+        serviceRequest.acceptServiceProvider(serviceProvider);
         serviceRequest.setStatus(OrderStatus.ACCEPTED);
         serviceRequestRepository.save(serviceRequest);
     }

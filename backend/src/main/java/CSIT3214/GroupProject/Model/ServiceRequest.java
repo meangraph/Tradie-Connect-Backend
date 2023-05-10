@@ -62,6 +62,16 @@ public class ServiceRequest {
     @Lob
     private String description;
 
+    public void addApplicant(ServiceProvider serviceProvider) {
+        this.applicants.add(serviceProvider);
+    }
+
+    public void acceptServiceProvider(ServiceProvider serviceProvider) {
+        this.applicants.clear();
+        this.qualifiedServiceProviders.clear();
+        this.serviceProvider = serviceProvider;
+    }
+
     @Override
     public String toString() {
         return "ServiceRequest{" +
