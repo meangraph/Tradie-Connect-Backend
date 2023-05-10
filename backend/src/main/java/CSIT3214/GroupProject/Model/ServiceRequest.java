@@ -1,6 +1,5 @@
 package CSIT3214.GroupProject.Model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -8,7 +7,6 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +41,14 @@ public class ServiceRequest {
     )
     private Set<ServiceProvider> applicants = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "service_request_qualified_providers",
+            joinColumns = @JoinColumn(name = "service_request_id"),
+            inverseJoinColumns = @JoinColumn(name = "service_provider_id")
+    )
+    private Set<ServiceProvider> qualifiedServiceProviders = new HashSet<>();
+
     @CreationTimestamp
     private LocalDate requestedDate;
     private LocalTime requestedTime;
@@ -55,5 +61,25 @@ public class ServiceRequest {
     private Double cost;
     @Lob
     private String description;
+
+    @Override
+    public String toString() {
+        return "ServiceRequest{" +
+                "id=" + id +
+                ", serviceType=" + serviceType +
+                ", status=" + status +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((serviceType == null) ? 0 : serviceType.hashCode());
+        result = prime * result + ((status == null) ? 0 : status.hashCode());
+        return result;
+    }
 
 }

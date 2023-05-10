@@ -54,4 +54,13 @@ public class Customer extends User {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + this.getId() +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
+    }
+
 }

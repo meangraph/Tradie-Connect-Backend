@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,9 @@ public class ServiceProvider extends User {
     @OneToMany(mappedBy = "serviceProvider")
     private List<Review> reviews;
 
+    @ManyToMany(mappedBy = "qualifiedServiceProviders")
+    private Set<ServiceRequest> qualifiedServiceRequests = new HashSet<>();
+
 
     public void addSkill(Skill skill) {
         skills.add(skill);
@@ -43,6 +47,27 @@ public class ServiceProvider extends User {
     public void removeSkill(Skill skill) {
         skills.remove(skill);
     }
+
+    @Override
+    public String toString() {
+        return "ServiceProvider{" +
+                "id=" + this.getId() +
+                ", companyName='" + companyName + '\'' +
+                ", rating=" + rating +
+                ", Abn='" + Abn + '\'' +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((Abn == null) ? 0 : Abn.hashCode());
+        result = prime * result + ((companyName == null) ? 0 : companyName.hashCode());
+        result = prime * result + ((rating == null) ? 0 : rating.hashCode());
+        return result;
+    }
+
 
 
     @Override
@@ -73,4 +98,6 @@ public class ServiceProvider extends User {
     public boolean isEnabled() {
         return true;
     }
+
+
 }

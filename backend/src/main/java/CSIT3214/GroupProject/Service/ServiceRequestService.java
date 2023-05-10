@@ -62,11 +62,29 @@ public class ServiceRequestService {
             serviceRequest.setScheduledEndDate(serviceRequestDTO.getEndDate());
             serviceRequest.setScheduledEndTime(serviceRequestDTO.getEndTime());
 
-            return serviceRequestRepository.save(serviceRequest);
+            ServiceRequest savedServiceRequest = serviceRequestRepository.save(serviceRequest);
+
+            // Find valid service providers
+            List<ServiceProvider> validServiceProviders = findValidServiceProviders(savedServiceRequest);
+            System.out.println("Valid Service Providers size: " + validServiceProviders.size());
+
+            // Add the saved service request to the valid service providers' qualified service requests
+            for (ServiceProvider serviceProvider : validServiceProviders) {
+                serviceProvider.getQualifiedServiceRequests().add(savedServiceRequest);
+                savedServiceRequest.getQualifiedServiceProviders().add(serviceProvider);
+                serviceProviderRepository.save(serviceProvider);
+            }
+
+            // Retrieve the updated ServiceRequest object from the database
+            ServiceRequest updatedServiceRequest = serviceRequestRepository.findById(savedServiceRequest.getId()).orElse(null);
+
+
+            return updatedServiceRequest;
         } else {
             return null;
         }
     }
+
 
     public List<ServiceProvider> findValidServiceProviders(ServiceRequest serviceRequest) {
         Suburb customerSuburb = serviceRequest.getCustomer().getSuburb();
@@ -75,6 +93,8 @@ public class ServiceRequestService {
 
         List<ServiceProvider> serviceProviderBySkill = serviceProviderRepository.findByServiceType(serviceRequest.getServiceType());
 
+        System.out.println("Service providers by skill size: " + serviceProviderBySkill.size());
+
         List<ServiceProvider> validServiceProviders = new ArrayList<>();
 
         for (ServiceProvider serviceProvider : serviceProviderBySkill) {
@@ -82,6 +102,8 @@ public class ServiceRequestService {
             double serviceProviderLongitude = serviceProvider.getSuburb().getLongitude();
 
             double distance = haversine(customerLatitude, customerLongitude, serviceProviderLatitude, serviceProviderLongitude);
+
+            System.out.println("Distance for ServiceProvider " + serviceProvider.getId() + ": " + distance);
 
             if (distance <= 50) {
                 validServiceProviders.add(serviceProvider);
