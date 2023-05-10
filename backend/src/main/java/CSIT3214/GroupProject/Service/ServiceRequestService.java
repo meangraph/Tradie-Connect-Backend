@@ -31,6 +31,10 @@ public class ServiceRequestService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private ServiceRequestApplicantRepository serviceRequestApplicantRepository;
+
+
     public List<ServiceRequest> findAllServiceRequests() {
         return serviceRequestRepository.findAll();
     }
@@ -106,6 +110,7 @@ public class ServiceRequestService {
             System.out.println("Distance for ServiceProvider " + serviceProvider.getId() + ": " + distance);
 
             if (distance <= 50) {
+                //serviceProvider.setDistance(distance);
                 validServiceProviders.add(serviceProvider);
             }
         }
@@ -113,7 +118,7 @@ public class ServiceRequestService {
         return validServiceProviders;
     }
 
-    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+    public double haversine(double lat1, double lon1, double lat2, double lon2) {
         final double R = 6371; // Earth radius in kilometers
 
         double latDistance = Math.toRadians(lat2 - lat1);
@@ -126,10 +131,17 @@ public class ServiceRequestService {
         return R * c;
     }
 
-    public void applyForServiceRequest(ServiceRequest serviceRequest, ServiceProvider serviceProvider) {
-        //serviceRequest.getApplicants().add(serviceProvider);
+    public void applyForServiceRequest(ServiceRequest serviceRequest, ServiceProvider serviceProvider, Double distance) {
+        ServiceRequestApplicant sra = new ServiceRequestApplicant();
+        sra.setServiceRequest(serviceRequest);
+        sra.setServiceProvider(serviceProvider);
+        sra.setDistance(distance);
+
+        // Save the ServiceRequestApplicant
+        serviceRequestApplicantRepository.save(sra);
+
+        // Update the ServiceRequest status
         serviceRequest.setStatus(OrderStatus.PENDING);
-        serviceRequest.addApplicant(serviceProvider);
         serviceRequestRepository.save(serviceRequest);
     }
 

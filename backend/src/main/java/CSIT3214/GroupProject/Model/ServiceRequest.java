@@ -33,13 +33,8 @@ public class ServiceRequest {
     @Column(nullable = false)
     private Skill serviceType;
 
-    @ManyToMany
-    @JoinTable(
-            name = "service_request_applicants",
-            joinColumns = @JoinColumn(name = "service_request_id"),
-            inverseJoinColumns = @JoinColumn(name = "service_provider_id")
-    )
-    private Set<ServiceProvider> applicants = new HashSet<>();
+    @OneToMany(mappedBy = "serviceRequest")
+    private Set<ServiceRequestApplicant> applicants = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -62,8 +57,8 @@ public class ServiceRequest {
     @Lob
     private String description;
 
-    public void addApplicant(ServiceProvider serviceProvider) {
-        this.applicants.add(serviceProvider);
+    public void addApplicant(ServiceRequestApplicant applicant) {
+        this.applicants.add(applicant);
     }
 
     public void acceptServiceProvider(ServiceProvider serviceProvider) {

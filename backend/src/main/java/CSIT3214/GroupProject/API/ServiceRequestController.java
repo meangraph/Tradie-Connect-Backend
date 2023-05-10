@@ -76,10 +76,19 @@ public class ServiceRequestController {
         Long serviceProviderId = extractUserIdFromRequest(request);
         ServiceProvider serviceProvider = serviceProviderRepository.findById(serviceProviderId).orElse(null);
         ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
-        if (serviceRequest == null) {
-            //TODO:
+
+        if (serviceRequest == null || serviceProvider == null) {
+            //TODO: handle the error
         }
-        serviceRequestService.applyForServiceRequest(serviceRequest, serviceProvider);
+
+        // Calculate the distance between the serviceProvider and the customer
+        double distance = serviceRequestService.haversine(
+                serviceProvider.getSuburb().getLatitude(),
+                serviceProvider.getSuburb().getLongitude(),
+                serviceRequest.getCustomer().getSuburb().getLatitude(),
+                serviceRequest.getCustomer().getSuburb().getLongitude());
+
+        serviceRequestService.applyForServiceRequest(serviceRequest, serviceProvider, distance);
     }
 
 

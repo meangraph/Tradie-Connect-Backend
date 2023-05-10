@@ -23,6 +23,7 @@ public class ServiceProvider extends User {
     private Double rating;
     private String Abn;
 
+
     @ElementCollection(targetClass = Skill.class)
     @CollectionTable(name = "service_provider_skill",
             joinColumns = @JoinColumn(name = "service_provider_id"))
