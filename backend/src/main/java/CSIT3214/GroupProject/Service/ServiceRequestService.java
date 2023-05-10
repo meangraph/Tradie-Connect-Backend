@@ -128,6 +128,7 @@ public class ServiceRequestService {
 
     public void applyForServiceRequest(ServiceRequest serviceRequest, ServiceProvider serviceProvider) {
         //serviceRequest.getApplicants().add(serviceProvider);
+        serviceRequest.setStatus(OrderStatus.PENDING);
         serviceRequest.addApplicant(serviceProvider);
         serviceRequestRepository.save(serviceRequest);
     }
