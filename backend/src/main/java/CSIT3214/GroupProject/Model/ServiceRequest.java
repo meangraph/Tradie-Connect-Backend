@@ -67,8 +67,13 @@ public class ServiceRequest {
     }
 
     public void acceptServiceProvider(ServiceProvider serviceProvider) {
-        this.applicants.clear();
-        this.qualifiedServiceProviders.clear();
+        //Remove the jobs from the losers who didn't get selected
+        for (ServiceProvider sp : qualifiedServiceProviders) {
+            sp.getQualifiedServiceRequests().remove(this);
+        }
+        qualifiedServiceProviders.clear(); // Clear the qualifiedServiceProviders set for this service request
+
+        this.applicants.remove(serviceProvider);
         this.serviceProvider = serviceProvider;
     }
 
