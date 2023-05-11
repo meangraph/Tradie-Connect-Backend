@@ -37,6 +37,7 @@ public class ServiceProvider extends User {
     @OneToMany(mappedBy = "serviceProvider")
     private List<Review> reviews;
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "qualifiedServiceProviders")
     private Set<ServiceRequest> qualifiedServiceRequests = new HashSet<>();
 

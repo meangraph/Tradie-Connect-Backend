@@ -2,8 +2,11 @@ package CSIT3214.GroupProject.DataAccessLayer;
 
 import CSIT3214.GroupProject.Model.Membership;
 import CSIT3214.GroupProject.Model.Role;
+import CSIT3214.GroupProject.Model.Skill;
 import CSIT3214.GroupProject.Model.Suburb;
 import lombok.Data;
+
+import java.util.Set;
 
 @Data
 public class UserDTO {
@@ -16,6 +19,7 @@ public class UserDTO {
     // ServiceProvider fields
     private String companyName;
     private String abn;
+    private Set<Skill> skills;
     // Common fields
     private String phoneNumber;
     private String streetAddress;

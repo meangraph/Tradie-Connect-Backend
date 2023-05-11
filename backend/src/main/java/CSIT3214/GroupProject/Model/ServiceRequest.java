@@ -1,5 +1,6 @@
 package CSIT3214.GroupProject.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -36,6 +37,7 @@ public class ServiceRequest {
     @OneToMany(mappedBy = "serviceRequest")
     private Set<ServiceRequestApplicant> applicants = new HashSet<>();
 
+    @JsonBackReference
     @ManyToMany
     @JoinTable(
             name = "service_request_qualified_providers",

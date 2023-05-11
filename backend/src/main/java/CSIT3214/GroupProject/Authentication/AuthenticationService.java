@@ -71,6 +71,7 @@ public class AuthenticationService {
             serviceProvider.setPhoneNumber(userDTO.getPhoneNumber());
             serviceProvider.setStreetAddress(userDTO.getStreetAddress());
             serviceProvider.setPostCode(userDTO.getPostCode());
+            serviceProvider.setSkills(userDTO.getSkills());
 
             Suburb suburb = suburbService.findOrCreateSuburb(userDTO.getSuburb().getName(), userDTO.getSuburb().getState(),
                     userDTO.getSuburb().getLatitude(), userDTO.getSuburb().getLongitude());
