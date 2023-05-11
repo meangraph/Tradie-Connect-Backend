@@ -1,6 +1,7 @@
 package CSIT3214.GroupProject.Model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -31,6 +32,7 @@ public class ServiceProvider extends User {
     private Set<Skill> skills = EnumSet.noneOf(Skill.class);
 
     @OneToMany(mappedBy = "serviceProvider")
+    @JsonIdentityReference(alwaysAsId = true)
     //@JsonManagedReference("serviceProvider-serviceRequests")
     private List<ServiceRequest> serviceRequests;
 
@@ -39,6 +41,7 @@ public class ServiceProvider extends User {
 
     @JsonManagedReference
     @ManyToMany(mappedBy = "qualifiedServiceProviders")
+    @JsonIdentityReference(alwaysAsId = true)
     private Set<ServiceRequest> qualifiedServiceRequests = new HashSet<>();
 
 
