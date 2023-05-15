@@ -5,6 +5,7 @@ import CSIT3214.GroupProject.DataAccessLayer.*;
 import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Service.MembershipService;
 import CSIT3214.GroupProject.Service.PaymentService;
+import CSIT3214.GroupProject.Service.ServiceRequestService;
 import CSIT3214.GroupProject.Service.SuburbService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +30,7 @@ public class AuthenticationService {
     private final SuburbService suburbService;
     private final MembershipService membershipService;
     private final SystemAdminRepository systemAdminRepository;
+    private final ServiceRequestService serviceRequestService;
 
     // Method to register a new user
     public AuthenticationResponse register(UserDTO userDTO) {
@@ -86,6 +88,7 @@ public class AuthenticationService {
             // Create a new CustomUserDetails object containing the service provider's information
             userDetails = new CustomUserDetails(serviceProvider, List.of(new SimpleGrantedAuthority(serviceProvider.getRole().toString())));
             user = serviceProvider;
+            serviceRequestService.addServiceProviderToQualifiedRequests(serviceProvider);
         }
 
         // Generate a JWT token for the user

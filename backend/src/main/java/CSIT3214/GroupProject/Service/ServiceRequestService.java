@@ -89,6 +89,35 @@ public class ServiceRequestService {
         }
     }
 
+    public void addServiceProviderToQualifiedRequests(ServiceProvider serviceProvider) {
+        List<ServiceRequest> serviceRequestsByType = serviceRequestRepository.findByServiceTypeInSet(serviceProvider.getSkills());
+
+        for (ServiceRequest serviceRequest : serviceRequestsByType) {
+            if (isValidServiceProvider(serviceProvider, serviceRequest)) {
+                serviceRequest.getQualifiedServiceProviders().add(serviceProvider);
+                serviceRequestRepository.save(serviceRequest);
+            }
+        }
+    }
+
+    public boolean isValidServiceProvider(ServiceProvider serviceProvider, ServiceRequest serviceRequest) {
+        Suburb customerSuburb = serviceRequest.getCustomer().getSuburb();
+        double customerLatitude = customerSuburb.getLatitude();
+        double customerLongitude = customerSuburb.getLongitude();
+        double serviceProviderLatitude = serviceProvider.getSuburb().getLatitude();
+        double serviceProviderLongitude = serviceProvider.getSuburb().getLongitude();
+
+        double distance = haversine(customerLatitude, customerLongitude, serviceProviderLatitude, serviceProviderLongitude);
+
+        System.out.println("Distance for ServiceProvider " + serviceProvider.getId() + ": " + distance);
+
+        if (distance <= 50) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     public List<ServiceProvider> findValidServiceProviders(ServiceRequest serviceRequest) {
         Suburb customerSuburb = serviceRequest.getCustomer().getSuburb();
