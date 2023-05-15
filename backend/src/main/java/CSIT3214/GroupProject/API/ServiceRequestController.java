@@ -5,10 +5,7 @@ import CSIT3214.GroupProject.DataAccessLayer.AcceptServiceRequestDTO;
 import CSIT3214.GroupProject.DataAccessLayer.CreateServiceRequestDTO;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceRequestRepository;
-import CSIT3214.GroupProject.Model.Customer;
-import CSIT3214.GroupProject.Model.Role;
-import CSIT3214.GroupProject.Model.ServiceProvider;
-import CSIT3214.GroupProject.Model.ServiceRequest;
+import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Service.ServiceRequestService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -27,6 +24,8 @@ public class ServiceRequestController {
 
     @Autowired
     private ServiceRequestService serviceRequestService;
+    @Autowired
+    private ServiceRequestRepository serviceRequestRepository;
     @Autowired
     private JwtService jwtService;
 
@@ -89,6 +88,17 @@ public class ServiceRequestController {
                 serviceRequest.getCustomer().getSuburb().getLongitude());
 
         serviceRequestService.applyForServiceRequest(serviceRequest, serviceProvider, distance);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
+    @PostMapping("/{serviceRequestId}/complete")
+    public void completeServiceRequest(@PathVariable Long serviceRequestId,HttpServletRequest request){
+        Long serviceProviderId = extractUserIdFromRequest(request);
+        ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
+
+        serviceRequest.setStatus(OrderStatus.COMPLETED);
+        serviceRequestRepository.save(serviceRequest);
+
     }
 
 
