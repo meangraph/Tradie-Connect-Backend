@@ -4,6 +4,7 @@ import CSIT3214.GroupProject.DataAccessLayer.UserDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +20,20 @@ public class AuthenticationController {
     // Endpoint to handle user registration
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
     @PostMapping("/SignUp")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody UserDTO userDTO, HttpServletResponse response) {
-        // Call the AuthenticationService's register method
-        AuthenticationResponse authResponse = authenticationService.register(userDTO);
-        // Create an HttpOnly cookie containing the JWT token
-        createHttpOnlyCookie(response, authResponse.getToken());
-        // Return the registration response
-        return ResponseEntity.ok(authResponse);
+    public ResponseEntity<?> register(@RequestBody UserDTO userDTO, HttpServletResponse response) {
+        try {
+            // Call the AuthenticationService's register method
+            AuthenticationResponse authResponse = authenticationService.register(userDTO);
+            // Create an HttpOnly cookie containing the JWT token
+            createHttpOnlyCookie(response, authResponse.getToken());
+            // Return the registration response
+            return ResponseEntity.ok(authResponse);
+        } catch (AuthenticationService.EmailAlreadyExistsException e) {
+            // If the EmailAlreadyExistsException is thrown, return a BAD_REQUEST response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
+
 
     // Endpoint to handle user authentication
     @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")

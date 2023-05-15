@@ -4,7 +4,6 @@ import CSIT3214.GroupProject.Config.JwtService;
 import CSIT3214.GroupProject.DataAccessLayer.*;
 import CSIT3214.GroupProject.Model.*;
 import CSIT3214.GroupProject.Service.MembershipService;
-import CSIT3214.GroupProject.Service.PaymentService;
 import CSIT3214.GroupProject.Service.ServiceRequestService;
 import CSIT3214.GroupProject.Service.SuburbService;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +32,14 @@ public class AuthenticationService {
     private final ServiceRequestService serviceRequestService;
 
     // Method to register a new user
-    public AuthenticationResponse register(UserDTO userDTO) {
+    public AuthenticationResponse register(UserDTO userDTO) throws EmailAlreadyExistsException {
         UserDetails userDetails;
         User user;
+
+        if (customerRepository.findByEmail(userDTO.getEmail()).isPresent() || serviceProviderRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email is already in use: " + userDTO.getEmail());
+        }
+        
         // Check the user role and create an appropriate user object
         if (userDTO.getRole() == Role.ROLE_CUSTOMER) {
             var customer = new Customer();
@@ -125,5 +129,11 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    static class EmailAlreadyExistsException extends Throwable {
+        public EmailAlreadyExistsException(String s) {
+            super(s);
+        }
     }
 }
