@@ -1,11 +1,7 @@
 package CSIT3214.GroupProject.Service;
 
-import CSIT3214.GroupProject.Config.JwtService;
 import CSIT3214.GroupProject.DataAccessLayer.*;
 import CSIT3214.GroupProject.Model.*;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +23,6 @@ public class ServiceRequestService {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
-    private JwtService jwtService;
 
     @Autowired
     private ServiceRequestApplicantRepository serviceRequestApplicantRepository;
@@ -80,10 +73,7 @@ public class ServiceRequestService {
             }
 
             // Retrieve the updated ServiceRequest object from the database
-            ServiceRequest updatedServiceRequest = serviceRequestRepository.findById(savedServiceRequest.getId()).orElse(null);
-
-
-            return updatedServiceRequest;
+            return serviceRequestRepository.findById(savedServiceRequest.getId()).orElse(null);
         } else {
             return null;
         }
@@ -111,11 +101,7 @@ public class ServiceRequestService {
 
         System.out.println("Distance for ServiceProvider " + serviceProvider.getId() + ": " + distance);
 
-        if (distance <= 50) {
-            return true;
-        }
-
-        return false;
+        return distance <= 50;
     }
 
 
@@ -147,6 +133,7 @@ public class ServiceRequestService {
         return validServiceProviders;
     }
 
+    //Haversine formula adapted from https://gist.github.com/vananth22/888ed9a22105670e7a4092bdcf0d72e4
     public double haversine(double lat1, double lon1, double lat2, double lon2) {
         final double R = 6371; // Earth radius in kilometers
 
@@ -179,60 +166,7 @@ public class ServiceRequestService {
         serviceRequest.setStatus(OrderStatus.ACCEPTED);
         serviceRequestRepository.save(serviceRequest);
     }
-    private String getJwtFromCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("JWT".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
 
-    private Long getUserIdFromClaims(Claims claims) {
-        Number userIdNumber = (Number) claims.get("userId");
-        if (userIdNumber == null) {
-            throw new IllegalArgumentException("User ID not found in JWT claims");
-        }
-        return userIdNumber.longValue();
-    }
-
-    private Role getRoleFromClaims(Claims claims) {
-        String roleString = (String) claims.get("role");
-        if (roleString == null) {
-            throw new IllegalArgumentException("Role not found in JWT claims");
-        }
-        return Role.valueOf(roleString);
-    }
-
-    private Long extractUserIdFromRequest(HttpServletRequest request) {
-        String jwt = getJwtFromCookies(request);
-        if (jwt == null) {
-            throw new IllegalArgumentException("JWT not found in cookies");
-        }
-        Claims claims = jwtService.extractAllClaims(jwt);
-        return getUserIdFromClaims(claims);
-    }
-
-
-
-    public ServiceRequest customerAcceptsRequest(Long serviceRequestId) {
-        Optional<ServiceRequest> serviceRequest = serviceRequestRepository.findById(serviceRequestId);
-
-        if (serviceRequest.isPresent()) {
-            ServiceRequest requestToUpdate = serviceRequest.get();
-            if (requestToUpdate.getStatus() == OrderStatus.QUOTED_AWAITING_CUSTOMER_APPROVAL) {
-                requestToUpdate.setStatus(OrderStatus.ACCEPTED);
-                return serviceRequestRepository.save(requestToUpdate);
-            } else {
-                throw new IllegalStateException("Service request must be in the QUOTED status to be accepted.");
-            }
-        } else {
-            return null;
-        }
-    }
 
     public List<ServiceRequest> findServiceRequestsByUserIdAndRole(Long userId, Role role) {
         if (role == Role.ROLE_CUSTOMER) {

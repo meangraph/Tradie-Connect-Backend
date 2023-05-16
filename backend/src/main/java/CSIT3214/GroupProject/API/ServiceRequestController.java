@@ -1,7 +1,6 @@
 package CSIT3214.GroupProject.API;
 
 import CSIT3214.GroupProject.Config.JwtService;
-import CSIT3214.GroupProject.DataAccessLayer.AcceptServiceRequestDTO;
 import CSIT3214.GroupProject.DataAccessLayer.CreateServiceRequestDTO;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceRequestRepository;
@@ -72,13 +71,14 @@ public class ServiceRequestController {
     @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
     @PostMapping("/{serviceRequestId}/apply")
     public void applyForServiceRequest(@PathVariable Long serviceRequestId, HttpServletRequest request) {
-        Long serviceProviderId = extractUserIdFromRequest(request);
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(serviceProviderId).orElse(null);
-        ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
+        try {
+            Long serviceProviderId = extractUserIdFromRequest(request);
+            ServiceProvider serviceProvider = serviceProviderRepository.findById(serviceProviderId).orElse(null);
+            ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
 
-        if (serviceRequest == null || serviceProvider == null) {
-            //TODO: handle the error
-        }
+            if (serviceRequest == null || serviceProvider == null) {
+                System.out.println("invalid service request ID or service provider ID");
+            }
 
         // Calculate the distance between the serviceProvider and the customer
         double distance = serviceRequestService.haversine(
@@ -88,12 +88,14 @@ public class ServiceRequestController {
                 serviceRequest.getCustomer().getSuburb().getLongitude());
 
         serviceRequestService.applyForServiceRequest(serviceRequest, serviceProvider, distance);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
     @PostMapping("/{serviceRequestId}/complete")
     public void completeServiceRequest(@PathVariable Long serviceRequestId,HttpServletRequest request){
-        Long serviceProviderId = extractUserIdFromRequest(request);
         ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
 
         serviceRequest.setStatus(OrderStatus.COMPLETED);
