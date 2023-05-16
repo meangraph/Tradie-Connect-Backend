@@ -45,15 +45,7 @@ public class ServiceRequestService {
             serviceRequest.setStatus(OrderStatus.CREATED);
             serviceRequest.setRequestedTime(LocalTime.from(LocalDateTime.now()));
             serviceRequest.setDescription(serviceRequestDTO.getDescription());
-
-            // Check if the customer has a CLIENT_SUBSCRIPTION membership type
-            if (customer.get().getMembership() != null &&
-                    customer.get().getMembership().getMembershipType() == MembershipType.CLIENT_SUBSCRIPTION) {
-                serviceRequest.setCost(0.0);
-            } else {
-                serviceRequest.setCost(serviceRequestDTO.getCost());
-            }
-
+            serviceRequest.setCost(serviceRequestDTO.getCost());
             serviceRequest.setScheduledStartDate(serviceRequestDTO.getStartDate());
             serviceRequest.setScheduledStartTime(serviceRequestDTO.getStartTime());
             serviceRequest.setScheduledEndDate(serviceRequestDTO.getEndDate());
