@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
@@ -97,7 +99,8 @@ public class ServiceRequestController {
     @PostMapping("/{serviceRequestId}/complete")
     public void completeServiceRequest(@PathVariable Long serviceRequestId,HttpServletRequest request){
         ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
-
+        serviceRequest.setCompletedAt(LocalTime.now());
+        serviceRequest.setCompletedOn(LocalDate.now());
         serviceRequest.setStatus(OrderStatus.COMPLETED);
         serviceRequestRepository.save(serviceRequest);
 

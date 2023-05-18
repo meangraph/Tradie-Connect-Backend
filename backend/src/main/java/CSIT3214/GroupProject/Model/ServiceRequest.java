@@ -53,6 +53,8 @@ public class ServiceRequest {
     private LocalTime scheduledStartTime;
     private LocalDate scheduledEndDate;
     private LocalTime scheduledEndTime;
+    private LocalDate completedOn;
+    private LocalTime completedAt;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Double cost;
