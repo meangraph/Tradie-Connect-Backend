@@ -1,5 +1,7 @@
 package CSIT3214.GroupProject.API;
 
+import CSIT3214.GroupProject.DataAccessLayer.CreateReviewDTO;
+import CSIT3214.GroupProject.DataAccessLayer.ReviewResponseDTO;
 import CSIT3214.GroupProject.Model.Review;
 import CSIT3214.GroupProject.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +23,27 @@ public class ReviewController {
         return reviewService.findAllReviews();
     }
 
-    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN', 'ROLE_CUSTOMER', 'ROLE_SERVICE_PROVIDER')")
     @GetMapping("/{id}")
-    public Review getReviewById(@PathVariable Long id) {
-        return reviewService.findReviewById(id);
+    public ReviewResponseDTO getReview(@PathVariable Long id) {
+        Review review = reviewService.findReviewById(id);
+        return toDTO(review);
+    }
+
+    public ReviewResponseDTO toDTO(Review review) {
+        ReviewResponseDTO dto = new ReviewResponseDTO();
+        dto.setId(review.getId());
+        dto.setCustomerId(review.getCustomer().getId());
+        dto.setServiceProviderId(review.getServiceProvider().getId());
+        dto.setServiceRequestId(review.getServiceRequest().getId());
+        dto.setRating(review.getRating());
+        dto.setComment(review.getComment());
+        return dto;
     }
 
     @PostMapping
-    public Review createReview(@RequestBody Review review) {
-        return reviewService.saveReview(review);
-    }
-
-    @PutMapping("/{id}")
-    public Review updateReview(@PathVariable Long id, @RequestBody Review review) {
-        review.setId(id);
-        return reviewService.saveReview(review);
+    public Review createReview(@RequestBody CreateReviewDTO reviewDto) {
+        return reviewService.saveReview(reviewDto);
     }
 
     @DeleteMapping("/{id}")

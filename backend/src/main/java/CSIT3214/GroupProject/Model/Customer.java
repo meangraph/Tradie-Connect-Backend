@@ -26,6 +26,7 @@ public class Customer extends User {
     private List<ServiceRequest> serviceRequests;
 
     @OneToMany(mappedBy = "customer")
+    @JsonIdentityReference(alwaysAsId = true)
     private List<Review> reviews;
 
     @Override
