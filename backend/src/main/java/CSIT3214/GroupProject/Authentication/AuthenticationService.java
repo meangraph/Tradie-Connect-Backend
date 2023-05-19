@@ -58,7 +58,10 @@ public class AuthenticationService {
             customer.setSuburb(suburb);
 
             Membership membership = membershipService.saveMembership(userDTO.getMembership());
+            PaymentInformation paymentInfo = new PaymentInformation(userDTO.getPaymentInformation().getCardName(), userDTO.getPaymentInformation().getCardNumber(),
+                                                                    userDTO.getPaymentInformation().getCardExpiry(), userDTO.getPaymentInformation().getCardCVV());
 
+            customer.setPaymentInformation(paymentInfo);
             customer.setMembership(membership);
 
             // Save the customer to the repository

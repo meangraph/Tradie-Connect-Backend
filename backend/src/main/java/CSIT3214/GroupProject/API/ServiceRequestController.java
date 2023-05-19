@@ -2,6 +2,7 @@ package CSIT3214.GroupProject.API;
 
 import CSIT3214.GroupProject.Config.JwtService;
 import CSIT3214.GroupProject.DataAccessLayer.CreateServiceRequestDTO;
+import CSIT3214.GroupProject.DataAccessLayer.CustomerRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceProviderRepository;
 import CSIT3214.GroupProject.DataAccessLayer.ServiceRequestRepository;
 import CSIT3214.GroupProject.Model.*;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -29,9 +31,10 @@ public class ServiceRequestController {
     private ServiceRequestRepository serviceRequestRepository;
     @Autowired
     private JwtService jwtService;
-
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @GetMapping
@@ -102,7 +105,25 @@ public class ServiceRequestController {
         serviceRequest.setCompletedAt(LocalTime.now());
         serviceRequest.setCompletedOn(LocalDate.now());
         serviceRequest.setStatus(OrderStatus.COMPLETED);
+
+        Payment payment = new Payment();
+
+        Customer customer = serviceRequest.getCustomer();
+        ServiceProvider serviceProvider = serviceRequest.getServiceProvider();
+
+        payment.setAmount(serviceRequest.getCost());
+        payment.setTransactionDate(LocalDateTime.now());
+        payment.setCustomer(customer);
+        payment.setServiceProvider(serviceProvider);
+
+        customer.addPayment(payment);
+        serviceProvider.addPayment(payment);
+
         serviceRequestRepository.save(serviceRequest);
+        customerRepository.save(customer);
+        serviceProviderRepository.save(serviceProvider);
+
+
 
     }
 

@@ -34,6 +34,14 @@ public abstract class User implements UserDetails {
     @JoinColumn(name = "membership_id", referencedColumnName = "id")
     private Membership membership;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "payment_id", referencedColumnName = "id")
+    private List<Payment> payments;
+
+
+    public void addPayment(Payment payment) {
+        this.payments.add(payment);
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

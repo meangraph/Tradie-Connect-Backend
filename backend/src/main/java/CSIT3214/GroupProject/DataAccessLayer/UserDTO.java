@@ -1,9 +1,6 @@
 package CSIT3214.GroupProject.DataAccessLayer;
 
-import CSIT3214.GroupProject.Model.Membership;
-import CSIT3214.GroupProject.Model.Role;
-import CSIT3214.GroupProject.Model.Skill;
-import CSIT3214.GroupProject.Model.Suburb;
+import CSIT3214.GroupProject.Model.*;
 import lombok.Data;
 
 import java.util.Set;
@@ -16,6 +13,7 @@ public class UserDTO {
     // Customer fields
     private String firstName;
     private String lastName;
+    private PaymentInformation paymentInformation;
     // ServiceProvider fields
     private String companyName;
     private String abn;

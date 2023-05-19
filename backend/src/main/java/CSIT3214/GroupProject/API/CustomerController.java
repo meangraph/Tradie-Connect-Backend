@@ -30,6 +30,7 @@ public class CustomerController extends BaseController{
     private SuburbService suburbService;
 
 
+
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @GetMapping
     public Customer getCurrentCustomer(HttpServletRequest request) {
@@ -72,8 +73,8 @@ public class CustomerController extends BaseController{
 
         // Iterate through the updatedFields map and update the existingCustomer object using Reflection API
         for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
-            if ("suburb".equals(entry.getKey())) {
-                // Skip the suburb field here, as we will handle it separately later.
+            if ("suburb".equals(entry.getKey()) || "paymentInformation".equals(entry.getKey())) {
+                // Skip the suburb/paymentInfo field here, as we will handle it separately later.
                 continue;
             }
 
@@ -107,7 +108,6 @@ public class CustomerController extends BaseController{
             String suburbState = suburbData.get("state");
 
             Suburb existingSuburb = suburbService.findSuburbByNameAndState(suburbName, suburbState);
-            // ... rest of the suburb handling logic
             if (existingSuburb == null || existingSuburb.getLatitude() == 0.0 || existingSuburb.getLongitude() == 0.0) {
                 LatLng latLng = geocodingService.getLatLng(suburbName, suburbState);
 
@@ -116,6 +116,24 @@ public class CustomerController extends BaseController{
             } else {
                 existingCustomer.setSuburb(existingSuburb);
             }
+        }
+
+        if (updatedFields.containsKey("paymentInformation")) {
+            Map<String, String> paymentInformation = (Map<String, String>) updatedFields.get("paymentInformation");
+            String cardName = paymentInformation.get("cardName");
+            String cardNumber = paymentInformation.get("cardNumber");
+            String cardExpiry = paymentInformation.get("cardExpiry");
+            String cardCVV = paymentInformation.get("cardCVV");
+
+            PaymentInformation paymentInfo = new PaymentInformation();
+            paymentInfo.setCardName(cardName);
+            paymentInfo.setCardNumber(cardNumber);
+            paymentInfo.setCardExpiry(cardExpiry);
+            paymentInfo.setCardCVV(cardCVV);
+
+
+            existingCustomer.setPaymentInformation(paymentInfo);
+
         }
 
         return customerService.saveCustomer(existingCustomer);

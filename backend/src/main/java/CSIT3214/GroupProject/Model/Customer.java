@@ -3,8 +3,7 @@ package CSIT3214.GroupProject.Model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +27,9 @@ public class Customer extends User {
     @OneToMany(mappedBy = "customer")
     @JsonIdentityReference(alwaysAsId = true)
     private List<Review> reviews;
+
+    @Embedded
+    private PaymentInformation paymentInformation;
 
     @Override
     public String getPassword()  { return super.getPassword(); }
