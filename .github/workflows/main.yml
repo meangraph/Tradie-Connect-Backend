@@ -6,7 +6,7 @@ on:
     
 jobs:
   build:
-    runs-on: ububntu-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: Step 1 - Checkout main branch from GitHub
