@@ -25,7 +25,7 @@ jobs:
         
       - name: Step  5 - Target Folder
         run: |
-          cd target
+          cd backend/target
           ls -a
           
           
