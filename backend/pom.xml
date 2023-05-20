@@ -16,6 +16,7 @@
 	<description>Group project for CSIT314</description>
 	<properties>
 		<java.version>17</java.version>
+		<start-class>CSIT3214.GroupProject.TradieFinderApplication</start-class>
 	</properties>
 	<dependencies>
 		<dependency>
