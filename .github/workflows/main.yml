@@ -24,7 +24,7 @@ jobs:
         run: ls -a
         
       - name: Step  5 - Target Folder
-        run: 
+        run: |
           cd target
           ls -a
           
