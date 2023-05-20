@@ -5,6 +5,8 @@ import CSIT3214.GroupProject.Model.Role;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseController {
@@ -41,15 +43,11 @@ public abstract class BaseController {
 
         return new UserIdAndRole(userId, role);
     }
-
+@NoArgsConstructor
+@AllArgsConstructor
     protected static class UserIdAndRole {
-        private final Long userId;
-        private final Role role;
-
-        public UserIdAndRole(Long userId, Role role) {
-            this.userId = userId;
-            this.role = role;
-        }
+        private Long userId;
+        private Role role;
 
         public Long getUserId() {
             return userId;
@@ -58,6 +56,10 @@ public abstract class BaseController {
         public Role getRole() {
             return role;
         }
+
+        public void setUserId(Long userId) {this.userId = userId;}
+
+        public void setRole(Role role) {this.role = role;}
 
 
     }
