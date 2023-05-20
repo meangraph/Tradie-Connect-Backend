@@ -98,7 +98,7 @@ public class ServiceRequestController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ROLE_SERVICE_PROVIDER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_CUSTOMER', 'ROLE_SERVICE_PROVIDER')")
     @PostMapping("/{serviceRequestId}/complete")
     public void completeServiceRequest(@PathVariable Long serviceRequestId,HttpServletRequest request){
         ServiceRequest serviceRequest = serviceRequestService.findServiceRequestById(serviceRequestId);
